@@ -1,8 +1,11 @@
 ---
 marp: true
 theme: default
+size: 4:3
 paginate: true
 _paginate: false
+title: Aula 01: Configuração do Debian
+author: Diego Cirilo
 
 ---
 <style>
@@ -32,6 +35,7 @@ $ su -
 # apt full-upgrade
 # apt install sudo
 ```
+
 ---
 # Configurando o `sudo`
 - Provavelmente seu usuário não ter permissão de usar o `sudo`
@@ -42,6 +46,7 @@ $ su -
 $ su -
 # visudo
 ```
+
 ---
 # /etc/sudoers
 
@@ -107,3 +112,5 @@ $ groups
 ```shell
 $ sudo apt update
 ```
+---
+# <!--fit--> Dúvidas? 🤔
