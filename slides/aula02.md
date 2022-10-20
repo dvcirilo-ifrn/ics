@@ -54,6 +54,11 @@ $ sudo apt install apache2
     - Ex. `$ sudo systemctl status apache2.service`
 ---
 # Systemd
+<style scoped>
+table {
+  font-size: 18px;
+}
+</style>
 
 | Operação | Função |
 |---|---|
@@ -145,6 +150,11 @@ $ sudo apt install apache2
 - O Apache roda como o usuário `www-data`;
 - Esse usuário deve ter acesso de leitura ao diretório do site;
 - É possível configurar com o `chmod 755 <diretorio>`.
+
+---
+# Arquivo `hosts`
+- `/etc/hosts` e `/etc/hostname`
+- Usado para configurar múltiplos sites na mesma máquina.
 
 ---
 # Página de teste
