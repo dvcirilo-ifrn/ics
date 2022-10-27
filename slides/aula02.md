@@ -146,40 +146,53 @@ table {
 ```
 
 ---
+# DocumentRoot
+
+- Caminho raiz do site
+- Todos os arquivos aparecem na URL a partir do *DocumentRoot*
+- Ex. www.meubelosite.com/fotos/index.html
+
+---
+# Editores de texto no terminal
+
+- nano/pico
+    - Mais simples, comandos para salvar, sair, etc, usando CTRL.
+- vi/vim
+    - Pode ser usado como IDE completa, extremamente poderoso
+    - Opera no conceito de modos: comando, inserção e visual
+
+---
+# Dicas no Vi/Vim
+- Para sair do modo de inserção use o `ESC`
+- Para entrar no modo de inserção (escrever) use `i`
+- Para sair do programa sem salvar: `:q!`
+- Para salvar e sair: `:wq`
+- [Mais comandos](https://vim.rtorr.com/lang/pt_br)
+
+---
+# Tarefa
+- Encontre o index.html padrão do Apache
+- Crie uma cópia para preserva-lo (`cp <origem> <destino>`)
+- Crie um novo index.html (pode usar CSS/JS)
+- Acesse o site a partir da sua máquina Windows para verificar o funcionamento.
+
+---
 # Permissões de acesso
 - O Apache roda como o usuário `www-data`;
 - Esse usuário deve ter acesso de leitura ao diretório do site;
 - É possível configurar com o `chmod 755 <diretorio>`.
 
 ---
-# Arquivo `hosts`
-- `/etc/hosts` e `/etc/hostname`
-- Usado para configurar múltiplos sites na mesma máquina.
-
----
-# Página de teste
-
----
 # Tarefa
-
----
-# Configurações do `/etc/hosts`
-
----
-# Como publicar sites estáticos
-
----
-# UFW
-
----
-# Acesso SSH
-
----
-# Acesso FTP/SFTP
-
----
-# Módulo PHP
-
----
-# `phpinfo()`
-
+- Crie um novo VirtualHost que aponte para uma pasta na sua *home*
+- Dica: copie as configurações do *default* e modifique o arquivo.
+- Adicione ao seu sites-available/meusite.conf:
+```
+<Directory /home/seuusuario/suapasta>
+        AllowOverride All
+        Options -Indexes
+        Require all granted
+</Directory>
+```
+- Configure as permissões de acesso para sua pasta
+- Crie um site nessa pasta e verifique o acesso a partir do Windows.
