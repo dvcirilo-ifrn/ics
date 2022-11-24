@@ -4,7 +4,7 @@ theme: default
 paginate: true
 _paginate: false
 size: 4:3
-title: Aula 03: Instalando o servidor web Apache2
+title: Aula 03: Acesso remoto ao servidor
 author: Diego Cirilo
 ---
 <style>
@@ -18,37 +18,28 @@ img, table {
 
 ### Prof. Diego Cirilo
 
-**Aula 02**: Instalando o servidor web Apache2
-
----
-# Arquivo `hosts`
-- `/etc/hosts` e `/etc/hostname`
-- Usado para configurar múltiplos sites na mesma máquina.
-
----
-# Página de teste
-
----
-# Tarefa
-
----
-# Configurações do `/etc/hosts`
-
----
-# Como publicar sites estáticos
-
----
-# UFW
+**Aula 03**: Acesso remoto ao servidor
 
 ---
 # Acesso SSH
+- Secure Shell
+
+- Instalar o OpenSSH Server:
+
+`$ sudo apt install openssh-server`
+
+- Da sua máquina acessar o servidor com:
+`$ ssh <usuario>@<servidor> -p<porta>`
+
+- No VirtualBox redirecionar a porta 2222 (exemplo) para a porta 22 no servidor
 
 ---
-# Acesso FTP/SFTP
+# Transferência de arquivos
+- scp - Secure Copy
+`$ scp -Pporta origem destino`
+- Ex. `scp -P2223 arquivo.html diego@localhost:arquivo.html`
+- SFTP/SSH FTP - Filezilla
 
 ---
-# Módulo PHP
-
----
-# `phpinfo()`
+# <!--fit--> Dúvidas? 🤔
 

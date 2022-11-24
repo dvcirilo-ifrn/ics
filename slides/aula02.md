@@ -196,3 +196,6 @@ table {
 ```
 - Configure as permissões de acesso para sua pasta
 - Crie um site nessa pasta e verifique o acesso a partir do Windows.
+
+---
+# <!--fit--> Dúvidas? 🤔
