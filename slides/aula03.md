@@ -38,7 +38,14 @@ img, table {
 - scp - Secure Copy
 `$ scp -Pporta origem destino`
 - Ex. `scp -P2223 arquivo.html diego@localhost:arquivo.html`
-- SFTP/SSH FTP - Filezilla
+- SFTP/SSH FTP
+
+---
+# Filezilla
+
+- Host: `sftp://localhost`
+- Port: `2222`
+- Usuário/Senha
 
 ---
 # <!--fit--> Dúvidas? 🤔
