@@ -122,4 +122,14 @@ img {
 - VSCode
 
 ---
+# Gerenciadores de Pacotes
+- Basicamente *appstores* do Linux
+- Garantem que os programas instalados funcionam em conjunto
+- Pacotes estão disponíveis em um repositório próprio de cada distro
+- Ex. 
+    - `apt` (Debian, Ubuntu e afins)
+    - `pacman` (Arch e afins)
+    - `yum`/`rpm` (Red Hat, Fedora e afins)
+    - ...
+---
 # <!--fit--> Dúvidas? 🤔
