@@ -101,6 +101,7 @@ img {
 ---
 # Interfaces Gráficas
 - XServer
+- Wayland
 - Gerenciadores de Janelas
     - Fluxbox, i3, dwm
 - Ambientes de Desktop
@@ -127,9 +128,15 @@ img {
 - Garantem que os programas instalados funcionam em conjunto
 - Pacotes estão disponíveis em um repositório próprio de cada distro
 - Ex. 
-    - `apt` (Debian, Ubuntu e afins)
+    - `apt`/`dpkg` (Debian, Ubuntu e afins)
     - `pacman` (Arch e afins)
     - `yum`/`rpm` (Red Hat, Fedora e afins)
     - ...
+---
+# Gerenciamento de pacotes
+- Pacotes permitem a instalação mais rápida e ocupando menos espaço
+- Componentes úteis em mais de uma aplicação são reutilizados
+- Dependências
+- Ex. bibliotecas
 ---
 # <!--fit--> Dúvidas? 🤔
