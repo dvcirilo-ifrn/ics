@@ -108,6 +108,7 @@ img {
 - Sistema com *journaling*;
 - Nomes armazenados em Unicode;
 - Possibilidade de criptografia;
+- Está sendo substituído no Windows 11 pelo ReFS, também proprietário.
 
 ---
 # EXT3/4
@@ -117,5 +118,20 @@ img {
 - Menor fragmentação do que o NTFS;
 - Permite mais caracteres em nomes de arquivos;
 
+---
+# Estrutura de diretórios no Windows
+- O Windows usa letras para definir as partições e discos;
+- As letras A: e B: são reservadas pra os disquetes;
+- O disco principal é o C:
+- [Windows Directory Structure](https://en.wikipedia.org/wiki/Directory_structure)
+
+---
+# Estrutura de diretórios no Linux
+- As partições no Linux são *transparentes* para o usuário;
+- Ex. uma pasta qualquer pode estar em outra partição;
+- Os discos físicos no Linux são definidos em `/dev/sda`, `/dev/sdb`, `/dev/sdc`, etc.
+- As partições são números. Ex. `/dev/sda1`, `/dev/sda2`.
+- Tais partições podem ser *montadas* em qualquer diretório, virando uma espécie de atalho.
+- [Filesystem Hierarchy Standard](https://pt.wikipedia.org/wiki/Filesystem_Hierarchy_Standard)
 ---
 # <!--fit--> Dúvidas? 🤔
