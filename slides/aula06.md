@@ -26,10 +26,12 @@ img {
 
 - No terminal, o espaço onde digitamos comandos é chamado de *prompt* de comando.
 - No *prompt* normalmente é indicado o usuário, o nome da máquina e o diretório atual.
-- `diego@debian:$`
+- `diego@debian:~$`
 - Usuários comuns são representados por `$` e o usuário *root* como `#`.
 - Nada aparece quando digitamos senhas.
 - Nada aparece quando o comando dá certo (salvo exceções).
+- Use a tecla TAB no teclado para completar os comandos e ver sugestões.
+- Use as setas para cima e para baixo para ver o histórico de comandos.
 
 ---
 # Estrutura de um comando
@@ -68,11 +70,11 @@ $ wget --help
     - A raiz do sistema é o `/`
     - Os arquivos do usuário ficam em `/home/usuario`
     - Arquivos de configuração em `/etc`
-- Lista completa: [Linux FHS](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard)
+- Lista completa: [Linux FHS](https://pt.wikipedia.org/wiki/Filesystem_Hierarchy_Standard)
 
 ---
 # Endereçamento absoluto e relativo
-- Absoluto: caminho completo a partir da raiz, logo SEMPRE começa com `/`
+- Absoluto: caminho completo a partir da raiz, logo **SEMPRE** começa com `/`
     - `/home/diego/ifrn/meu-arquivo`
 - Relativo: depende do diretório atual.
     - É possível referenciar níveis acima com `..`
@@ -81,9 +83,73 @@ $ wget --help
     - `cd ifrn/meu-diretorio`
 
 ---
-# Criação de diretórios
-- `mkdir nome`
-- Atenção para as permissões!
+# Criação de diretórios e arquivos
+- `mkdir nome` - Cria diretório
+- `touch nome` - Cria arquivo vazio
+- Normalmente não são permitidos acentos e espaços
+    - É necessário escrever entre aspas. Ex.
+    - `touch "meu arquivo absurdo"`
+    - De toda forma não é recomendável!
 
+---
+# Removendo arquivos e diretórios
+- `rm nome`
+- Opções:
+    - `rm -r diretorio` - Recursivo
+    - `rm -rf diretorio` - Recursivo e "forçado"
+- Coringas (wildcards) - **CUIDADO**
+    - `rm *.pdf` - remove todos os pdfs de um diretório
+    - `rm tes*`  - remove todos os arquivos que começam com `tes`
+    - `rm -rf *` - remove todos os arquivos de um diretório
+
+---
+# Exemplo
+- Na sua *home*, crie a seguinte estrutura de diretórios:
+    - `filmes`
+        - `nacionais`
+            - `comedia`
+            - `drama`
+        - `internacionais`
+            - `dublados`
+            - `legendados`
+    - `series`
+        - `pra-assistir`
+        - `assistidas`
+- Crie pelo menos um arquivo em cada diretório final (os mais internos).
+- Na sua *home* (use `cd ~` para voltar para home), faça `ls -lR` para listar todas os diretórios recursivamente.
+- Apague tudo :)
+
+---
+# Usuários e Grupos
+- Funcionalidade para gerenciamento de permissões de acesso
+- Cada usuário pode pertencer a um ou mais grupos
+- Quais grupos eu faço parte?
+    - `groups`
+- Os usuários ficam listados no arquivo `/etc/passwd`
+- Os grupos ficam listados no arquivo `/etc/group`
+
+---
+# Permissões e propriedade
+- Arquivos pertencem a um usuário e a um grupo
+- No Linux/Unix *everything is a file*
+- Usuários e grupos tem níveis de permissão para um arquivo:
+    - `r` *read*
+    - `w` *write*
+    - `x` *execute*
+- A ordem no `ls -l` é: dono, grupo e outros.
+
+---
+# Configurando permissões
+- `chmod permissoes arquivos`
+- As permissões podem ser no formato binário ou com letras.
+- Binário
+    - Os bits na ordem `rwx` convertidos para decimal.
+    - Ex. `101` é 5, `100` é 4, etc.
+    - Usamos um dígito para cada usuário, na ordem dono, grupo e outros.
+    - Ex. "644", "777"
+- Letras
+    - Usamos `+` para adicionar e `-` para remover
+    - `u` para o dono, `g` para o grupo e `o` para os outros. `a` para todos.
+    - Ex. `a+x`, `go-x`, etc.
 ---
 # <!--fit--> Dúvidas? 🤔
