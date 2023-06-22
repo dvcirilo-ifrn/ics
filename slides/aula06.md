@@ -22,6 +22,7 @@ img {
 **Aula 06**: Comandos Linux
 
 ---
+<style scoped>section { font-size: 26px; }</style>
 # Informações gerais
 
 - No terminal, o espaço onde digitamos comandos é chamado de *prompt* de comando.
@@ -52,6 +53,7 @@ $ wget --help
 ```
 
 ---
+<style scoped>section { font-size: 26px; }</style>
 # Comandos básicos
 - `ls` lista o conteúdo do diretório. Opções úteis:
     - `ls -l` lista detalhes dos arquivos
@@ -104,6 +106,7 @@ $ wget --help
 
 ---
 # Exemplo
+<style scoped>section { font-size: 22px; }</style>
 - Na sua *home*, crie a seguinte estrutura de diretórios:
     - `filmes`
         - `nacionais`
