@@ -77,4 +77,144 @@ img {
 - Verifique o resultado com `ls -l`
 
 ---
+# Usuários
+
+- Para criar um usuário usamos:
+    - `# adduser nome`
+- Para definir uma senha de usuário:
+    - `# passwd nome`
+- Uma *home* é criada para o novo usuário em `/home/nome`
+
+---
+# Usuários
+- Para remover um usuário:
+    - `# deluser nome`
+- A *home* do usuário não é removida automaticamente.
+- O comando `usermod` modifica informações do usuário.
+- Para trocar de usuário (*select user*):
+    - `$ su - nome`
+    - `$ su -` para virar `root`
+    - (entenda o `-` lendo o manual: `man su`)
+
+---
+# Grupos
+- Permitem gerenciamento de acesso e permissões para conjuntos de usuários.
+- Para criar novo grupo:
+    - `# groupadd nome`
+- Para remover grupo:
+    - `# groupdel nome`
+- Para editar grupo (ex. renomear):
+    - `# groupmod -n novo velho`
+- Adicionar usuário a um grupo:
+    - `# usermod -aG grupo usuario`
+- Remover usuário do grupo:
+    - `# gpasswd --delete usuario grupo`
+
+---
+# `sudo`
+- Os usuários por padrão não tem permissão de administrador
+- O comando `sudo` permite que um usuário comum execute comandos como `root` temporariamente.
+- Evita erros catastróficos.
+
+---
+# Configurando o `sudo`
+- Vire *super user* com `su -` 
+- Atualize o sistema e instale o pacote `sudo`
+
+```shell
+$ su - 
+
+# apt update
+# apt full-upgrade
+# apt install sudo
+```
+
+---
+# Configurando o `sudo`
+- Provavelmente seu usuário não tem permissão de usar o `sudo`
+- Saia do login de *root* (`exit`) e teste! Ex. `sudo apt update`
+- Para configurar as permissões de `sudo` usamos o `visudo`
+
+```shell
+$ su -
+# visudo
+```
+
+---
+# /etc/sudoers
+
+```bash
+#
+# This file MUST be edited with the 'visudo' command as root.
+#
+# Please consider adding local content in /etc/sudoers.d/ instead of
+# directly modifying this file.
+#
+# See the man page for details on how to write a sudoers file.
+#
+Defaults	env_reset
+Defaults	mail_badpass
+Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Host alias specification
+
+# User alias specification
+
+# Cmnd alias specification
+
+# User privilege specification
+root	ALL=(ALL:ALL) ALL
+
+# Allow members of group sudo to execute any command
+%sudo	ALL=(ALL:ALL) ALL
+
+# See sudoers(5) for more information on "@include" directives:
+
+@includedir /etc/sudoers.d
+```
+
+---
+# `/etc/sudoers`
+
+- **root** ALL=(ALL:ALL) ALL - Usuário ou grupo, se iniciar com `%`
+- root **ALL**=(ALL:ALL) ALL - Em que hosts pode executar
+- root ALL=(**ALL**:ALL) ALL - Como qual usuário
+- root ALL=(ALL:**ALL**) ALL - Com qual grupo
+- root ALL=(ALL:ALL) **ALL** - Quais comandos
+
+---
+# Entrando no grupo *sudo*
+
+- Podemos criar permissões para nosso usuário ou entrar no grupo *sudo*
+- Para entrar no grupo:
+```shell
+# usermod -aG sudo usuario
+# exit
+$ exit
+```
+- E fazemos login novamente para as mudanças terem efeito
+
+---
+# Verificando
+- Verifique se faz parte do grupo com:
+```shell
+$ groups
+```
+- E teste:
+```shell
+$ sudo apt update
+```
+---
+# Exercício
+- Usando comandos com `sudo`:
+    - Crie os usuários `visitante` e `john`
+    - Defina a senha `1234` para os dois novos usuários.
+    - Crie um grupo chamado `alunos`
+    - Adicione `visitante` e `john` ao grupo alunos.
+- Verifique em `/etc/group` e em `/etc/passwd` se deu certo.
+- Saia do seu usuário e faça login como `john`.
+- Saia do usuário `john`, faça login com seu usuário e remova `john`, `visitante` e o grupo `alunos`.
+- Remova os diretórios dos usuários (`# rm -rf /home/usuario`). **CUIDADO**
+
+---
 # <!--fit--> Dúvidas? 🤔
