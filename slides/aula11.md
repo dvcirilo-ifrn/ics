@@ -131,7 +131,7 @@ sudo chown -R www-data:www-data /var/www/html/phpMyAdmin
 ```sh
 sudo systemctl restart apache2
 ```
-- Acesse em http://localhost:8080/phpMyAdmin
+- Acesse em http://localhost:8888/phpMyAdmin
 
 ---
 # <!--fit--> Dúvidas? 🤔
