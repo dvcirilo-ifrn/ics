@@ -45,6 +45,7 @@ $ sudo systemctl status mariadb
 ```sh
 $ sudo mysql_secure_installation
 ```
+- Enter current password for root (enter for none): - Aperte `Enter` já que ainda não há senha de *root*
 - Switch to unix_socket authentication [Y/n] - `n` para pular.
 - Set root password? [Y/n] - Digite `y` e aperte `Enter` para criar uma senha forte de `root` para seu BD. 
 - Remove anonymous users? [Y/n] - Digite `y` e `Enter`.
@@ -69,10 +70,13 @@ GRANT ALL PRIVILEGES ON *.* TO 'admin'@localhost IDENTIFIED BY 'senhaadmin';
 ```sql
 FLUSH PRIVILEGES;
 ```
+- Saia do MariaDB: `quit`
 ---
 # phpMyAdmin
+
 - Cliente web para MySQL/MariaDB;
 - Funciona em PHP, que deve estar ativado no servidor web (Apache/Nginx);
+- O Debian já possui o pacote do phpMyAdmin.
 - Instale os pacotes do PHP:
 ```sh
 $ sudo apt install php php-cgi php-mysqli php-pear php-mbstring libapache2-mod-php php-common php-phpseclib php-mysql
@@ -83,7 +87,7 @@ $ php --version
 ```
 
 ---
-# phpMyAdmin
+# phpMyAdmin no Apache
 - Baixe o phpMyAdmin do site:
 ```sh
 $ wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz
@@ -98,7 +102,7 @@ $ sudo tar xvf phpMyAdmin-latest-all-languages.tar.gz --strip-components=1 -C /v
 ```
 
 ---
-# phpMyAdmin
+# phpMyAdmin no Apache
 - Copie a configuração padrão:
 ```sh
 $ sudo cp /var/www/html/phpMyAdmin/config.sample.inc.php /var/www/html/phpMyAdmin/config.inc.php
@@ -118,7 +122,7 @@ $cfg['blowfish_secret'] = '';
 $cfg['blowfish_secret'] = 'Sua-Nova-Senha-Complexa';
 ```
 ---
-# phpMyAdmin
+# phpMyAdmin no Apache
 - Mude as permissões do arquivo:
 ```sh
 sudo chmod 660 /var/www/html/phpMyAdmin/config.inc.php
@@ -132,6 +136,42 @@ sudo chown -R www-data:www-data /var/www/html/phpMyAdmin
 sudo systemctl restart apache2
 ```
 - Acesse em http://localhost:8888/phpMyAdmin
+
+---
+# phpMyAdmin no nginx
+
+- Instale o pacote do *phpMyAdmin* e as dependências do *php*
+```sh
+sudo apt install phpmyadmin php-fpm php-mysql
+```
+- O instalador perguntará se deseja configurar para o `Apache` ou para o `lighttpd`, como não usaremos nenhum dos dois, não marque nenhuma opção e selecione o *OK*.
+
+---
+# phpMyAdmin no nginx
+- Verifique se o arquivo de configurações do site *default* do nginx está com o PHP habilitado:
+```sh
+sudo nano /etc/nginx/sites-available/default
+```
+- As seguintes linhas devem estar sem comentário. **ATENÇÃO**: ajuste a versão do PHP na linha do php8.2-fpm.sock, caso sua versão não seja a 8.2.
+```sh
+# pass PHP scripts to FastCGI server
+    #
+    location ~ \.php$ { include snippets/fastcgi-php.conf;
+
+            # With php-fpm (or other unix sockets):
+            fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+    #       # With php-cgi (or other tcp sockets):
+    #       fastcgi_pass 127.0.0.1:9000;
+    }
+```
+
+---
+# phpMyAdmin no nginx
+- Crie um link simbólico para o phpMyAdmin na pasta `/var/www/html`
+```sh
+sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
+```
+- Reinicie o *nginx* e verifique o funcionamento em http://localhost:8888/phpmyadmin
 
 ---
 # <!--fit--> Dúvidas? 🤔
