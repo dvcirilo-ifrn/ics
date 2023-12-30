@@ -39,16 +39,16 @@ img, table {
 ---
 # Preparação
 - Verifique que o *nginx* e o *MySQL* estão funcionando corretamente (aulas anteriores)
-- Instale a dependências:
+- Instale as dependências:
 ```bash
-$ sudo apt-get install python3-pip python3-venv libmariadb-dev
+$ sudo apt-get install python3-pip python3-venv libmariadb-dev pkg-config
 ```
 
 ---
 # Preparação
 
 - Copie a pasta do seu projeto Django para sua *home* (use o Filezilla)
-- Re-crie o *venv* dentro da pasta do seu projeto e ative-o
+- Re-crie o *venv* dentro da pasta do seu projeto e ative-o (perceba que o comando do *venv* é diferente do *Windows*):
 ```sh
 python3 -m venv venv
 source venv/bin/activate
@@ -57,7 +57,7 @@ source venv/bin/activate
 ```sh
 pip install -r requirements.txt
 ```
-- Instale também as dependências para o servidor
+- Instale também as novas dependências para o servidor
 
 ```bash
 $ pip install mysqlclient gunicorn
@@ -77,6 +77,7 @@ $ quit
 ```
 
 ---
+<style scoped>section { font-size: 22px; }</style>
 # Modifique as configurações
 - Modifique o arquivo `settings.py` para configurar os *hosts* e o banco de dados.
 
@@ -223,3 +224,20 @@ Se não houver nenhum erro, reinicie o nginx
 sudo systemctl restart nginx
 ```
 - Acesse a aplicação em http://localhost:8888/
+
+---
+# Solucionando erros
+
+- Leia o *status* do *nginx* com o `systemctl status`
+- Leia o *log* de erros do *nginx* para mais
+informações usando:
+```sh
+sudo tail /var/log/nginx/error.log
+```
+- Caso haja erros de acesso negado ao acessar o site, dê acesso completo de leitura ao seu diretório (o `-R` significa recursivo):
+```sh
+chmod -R +r /home/<usuario>
+```
+
+---
+# <!--fit--> Dúvidas? 🤔
