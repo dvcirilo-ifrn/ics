@@ -53,20 +53,21 @@ $ sudo apt-get install python3-pip python3-venv libmariadb-dev pkg-config
 python3 -m venv venv
 source venv/bin/activate
 ```
-- Instale as dependências do seu projeto:
+- Instale as dependências do seu projeto, se houver:
 ```sh
 pip install -r requirements.txt
 ```
 - Instale também as novas dependências para o servidor
 
 ```bash
-$ pip install mysqlclient gunicorn
+$ pip install mysqlclient gunicorn django
 ```
 
 ---
 # Configure o banco de dados
 
 - Crie um usuário e uma tabela no banco para seu projeto (nunca rode como *root*)
+- **Substitua o `<exemplo>` com suas informações**
 
 ``` bash
 $ sudo mysql -u root -p
@@ -118,8 +119,13 @@ MEDIA_ROOT=os.path.join(BASE_DIR, 'media/')
 ``` bash
 python manage.py makemigrations
 python manage.py migrate
+```
+
+- Faça as colete os arquivos estáticos para a pasta *static*
+``` bash
 python manage.py collectstatic
 ```
+
 - Crie também o *superuser* do seu sistema
 ```sh
 python manage.py createsuperuser

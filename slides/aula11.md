@@ -71,8 +71,9 @@ GRANT ALL PRIVILEGES ON *.* TO 'admin'@localhost IDENTIFIED BY 'senhaadmin';
 FLUSH PRIVILEGES;
 ```
 - Saia do MariaDB: `quit`
+
 ---
-# phpMyAdmin
+# phpMyAdmin no Apache
 
 - Cliente web para MySQL/MariaDB;
 - Funciona em PHP, que deve estar ativado no servidor web (Apache/Nginx);
@@ -144,7 +145,7 @@ sudo systemctl restart apache2
 ```sh
 sudo apt install phpmyadmin php-fpm php-mysql
 ```
-- O instalador perguntará se deseja configurar para o `Apache` ou para o `lighttpd`, como não usaremos nenhum dos dois, não marque nenhuma opção e selecione o *OK*.
+- O instalador perguntará se deseja configurar para o `Apache` ou para o `lighttpd`, como não usaremos nenhum dos dois, **não marque nenhuma opção** e selecione o *OK*.
 
 ---
 <style scoped>section { font-size: 22px; }</style>
