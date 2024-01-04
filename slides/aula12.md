@@ -71,16 +71,16 @@ $ pip install mysqlclient gunicorn
 ``` bash
 $ sudo mysql -u root -p
 $ CREATE DATABASE <banco-do-app> CHARACTER SET 'utf8';
-$ CREATE USER <user-do-app>
+$ CREATE USER <user-do-app>;
 $ GRANT ALL ON <banco-do-app>.* TO '<user-do-app>'@'localhost' IDENTIFIED BY '<senha-do-user-do-app>';
 $ quit
 ```
 
 ---
-<style scoped>section { font-size: 22px; }</style>
+<style scoped>section { font-size: 20px; }</style>
 # Modifique as configurações
 - Modifique o arquivo `settings.py` para configurar os *hosts* e o banco de dados.
-
+- Adicione `import os` no início do arquivo.
 ``` python
 DEBUG = False
 
@@ -176,11 +176,12 @@ sudo systemctl restart <app>_gunicorn.service
 ```
 
 ---
+<style scoped>section { font-size: 20px; }</style>
 # Configurando o Nginx
 
 - Crie um novo arquivo de configuração do nginx
 ```
-sudo gedit /etc/nginx/sites-available/<projeto-django>
+sudo nano /etc/nginx/sites-available/<projeto-django>
 ```
 
 - Adicione os seguintes conteúdos, alterando o que for necessário:
@@ -234,9 +235,9 @@ informações usando:
 ```sh
 sudo tail /var/log/nginx/error.log
 ```
-- Caso haja erros de acesso negado ao acessar o site, dê acesso completo de leitura ao seu diretório (o `-R` significa recursivo):
+- Caso haja erros de acesso negado ao acessar o site, dê acesso completo ao seu diretório (o `-R` significa recursivo), reinicie o serviço e o nginx:
 ```sh
-chmod -R +r /home/<usuario>
+chmod -R 777 /home/<usuario>
 ```
 
 ---
