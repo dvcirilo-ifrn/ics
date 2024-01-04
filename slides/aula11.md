@@ -147,11 +147,18 @@ sudo apt install phpmyadmin php-fpm php-mysql
 - O instalador perguntará se deseja configurar para o `Apache` ou para o `lighttpd`, como não usaremos nenhum dos dois, não marque nenhuma opção e selecione o *OK*.
 
 ---
+<style scoped>section { font-size: 22px; }</style>
 # phpMyAdmin no nginx
 - Verifique se o arquivo de configurações do site *default* do nginx está com o PHP habilitado:
 ```sh
 sudo nano /etc/nginx/sites-available/default
 ```
+- Adicione `index.php` à lista de arquivos padrão:
+```
+# Add index.php to the list if you are using PHP
+index index.html index.htm index.nginx-debian.html index.php;
+```
+
 - As seguintes linhas devem estar sem comentário. **ATENÇÃO**: ajuste a versão do PHP na linha do php8.2-fpm.sock, caso sua versão não seja a 8.2.
 ```sh
 # pass PHP scripts to FastCGI server
