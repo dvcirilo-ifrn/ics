@@ -37,6 +37,7 @@ img, table {
 ```sh
 $ sudo apt install mariadb-server mariadb-client
 ```
+- Verifique o funcionamento:
 ```sh
 $ sudo systemctl status mariadb
 ```
@@ -136,7 +137,7 @@ sudo chown -R www-data:www-data /var/www/html/phpMyAdmin
 ```sh
 sudo systemctl restart apache2
 ```
-- Acesse em http://localhost:8888/phpMyAdmin
+- Acesse em http://localhost:8080/phpMyAdmin
 
 ---
 # phpMyAdmin no nginx
@@ -179,7 +180,7 @@ index index.html index.htm index.nginx-debian.html index.php;
 ```sh
 sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 ```
-- Reinicie o *nginx* e verifique o funcionamento em http://localhost:8888/phpmyadmin
+- Reinicie o *nginx* e verifique o funcionamento em http://localhost:8080/phpmyadmin
 
 ---
 # <!--fit--> Dúvidas? 🤔

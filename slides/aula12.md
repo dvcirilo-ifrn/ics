@@ -47,20 +47,20 @@ $ sudo apt-get install python3-pip python3-venv libmariadb-dev pkg-config
 ---
 # Preparação
 
-- Copie a pasta do seu projeto Django para sua *home* (use o Filezilla)
+- Copie a pasta do seu projeto Django para sua *home* (use o Filezilla ou Git)
 - Re-crie o *venv* dentro da pasta do seu projeto e ative-o (perceba que o comando do *venv* é diferente do *Windows*):
 ```sh
 python3 -m venv venv
 source venv/bin/activate
 ```
-- Instale as dependências do seu projeto, se houver:
+- Instale as dependências do seu projeto:
 ```sh
 pip install -r requirements.txt
 ```
 - Instale também as novas dependências para o servidor
 
 ```bash
-$ pip install mysqlclient gunicorn django
+$ pip install mysqlclient gunicorn
 ```
 
 ---
@@ -121,12 +121,12 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-- Faça as colete os arquivos estáticos para a pasta *static*
+- Colete os arquivos estáticos para a pasta *static*
 ``` bash
 python manage.py collectstatic
 ```
 
-- Crie também o *superuser* do seu sistema
+- Caso necessário, crie também o *superuser* do seu sistema
 ```sh
 python manage.py createsuperuser
 ```
@@ -135,31 +135,54 @@ python manage.py createsuperuser
 ```
 python manage.py runserver
 ```
+
 ---
 # Configure o *gunicorn*
 - *Gunicorn* - Unicórnio Verde: servidor HTTP para Python.
 - Processa e encaminha as requisições entre o servidor web e a aplicação Python
+- Disponibiliza um *socket* para que o *nginx* possa se comunicar com Django.
 - Deve rodar como um *daemon* no sistema
 
 ---
-# *Gunicorn Daemon*
+# *Gunicorn Daemon* e *socket*
 
-- Crie um arquivo <app>_gunicorn.service
+- Crie um arquivo <projeto>_gunicorn.socket
 
 ```bash
-sudo nano /etc/systemd/system/<app>_gunicorn.service
+sudo nano /etc/systemd/system/<projeto>_gunicorn.socket
+```
+- Com o seguinte conteúdo:
+```
+[Unit]
+Description=gunicorn socket
+
+[Socket]
+ListenStream=/run/<projeto>_gunicorn.sock
+
+[Install]
+WantedBy=sockets.target
+```
+
+---
+# *Gunicorn Daemon
+
+- Crie um arquivo <projeto>_gunicorn.service
+
+```bash
+sudo nano /etc/systemd/system/<projeto>_gunicorn.service
 ```
 - Com o seguinte conteúdo:
 ```
 [Unit]
 Description=gunicorn service
 After=network.target
+Requires=<projeto>_gunicorn.socket
 
 [Service]
 User=<user>
 Group=www-data
 WorkingDirectory=/home/<user>/<projeto-django>/
-ExecStart=/home/<user>/<projeto-django>/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/<user>/<projeto-django>/<projeto-django>.sock <projeto-django>.wsgi:application
+ExecStart=/home/<user>/<projeto-django>/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/run/<projeto-django>.sock <projeto-django>.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
@@ -190,7 +213,7 @@ sudo systemctl restart <app>_gunicorn.service
 sudo nano /etc/nginx/sites-available/<projeto-django>
 ```
 
-- Adicione os seguintes conteúdos, alterando o que for necessário:
+- Adicione os seguintes conteúdos, alterando o que estiver entre `< >`:
 ```
 server {
        listen 80;    
@@ -207,7 +230,7 @@ server {
     
         location / {
             include proxy_params;
-            proxy_pass http://unix:/home/<user>/<projeto-django>/<projeto-django>.sock;
+            proxy_pass http://unix:/run/<projeto-django>_gunicorn.sock;
         }
      }
 ```
@@ -230,7 +253,7 @@ Se não houver nenhum erro, reinicie o nginx
 ```
 sudo systemctl restart nginx
 ```
-- Acesse a aplicação em http://localhost:8888/
+- Acesse a aplicação em http://localhost:8080/
 
 ---
 # Solucionando erros
@@ -245,6 +268,13 @@ sudo tail /var/log/nginx/error.log
 ```sh
 chmod -R 777 /home/<usuario>
 ```
+
+---
+# Referências
+- https://realpython.com/django-nginx-gunicorn/
+- https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu
+- https://docs.gunicorn.org/en/latest/deploy.html 
+- https://docs.djangoproject.com/en/5.1/howto/static-files/deployment/
 
 ---
 # <!--fit--> Dúvidas? 🤔
