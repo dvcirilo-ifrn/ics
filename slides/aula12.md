@@ -45,6 +45,7 @@ $ sudo apt-get install python3-pip python3-venv libmariadb-dev pkg-config
 ```
 
 ---
+<style scoped>section { font-size: 22px; }</style>
 # Preparação
 
 - Copie a pasta do seu projeto Django para sua *home* (use o Filezilla ou Git)
@@ -78,10 +79,13 @@ $ quit
 ```
 
 ---
-<style scoped>section { font-size: 20px; }</style>
 # Modifique as configurações
 - Modifique o arquivo `settings.py` para configurar os *hosts* e o banco de dados.
 - Adicione `import os` no início do arquivo.
+
+---
+<style scoped>pre { font-size: 14px; }</style>
+# Modifique as configurações
 ``` python
 DEBUG = False
 
@@ -114,6 +118,7 @@ MEDIA_ROOT=os.path.join(BASE_DIR, 'media/')
 ```
 
 ---
+<style scoped>section { font-size: 24px; }</style>
 # *Migrations*
 - Faça as *migrations*
 ``` bash
@@ -164,7 +169,7 @@ WantedBy=sockets.target
 ```
 
 ---
-# *Gunicorn Daemon
+# *Gunicorn Daemon*
 
 - Crie um arquivo <projeto>_gunicorn.service
 
@@ -205,7 +210,8 @@ sudo systemctl restart <app>_gunicorn.service
 ```
 
 ---
-<style scoped>section { font-size: 20px; }</style>
+<style scoped>section { font-size: 22px; }</style>
+<style scoped>pre { font-size: 14px; }</style>
 # Configurando o Nginx
 
 - Crie um novo arquivo de configuração do nginx
