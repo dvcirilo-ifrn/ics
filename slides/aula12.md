@@ -287,7 +287,7 @@ Se não houver nenhum erro, reinicie o nginx
 ```
 sudo systemctl restart nginx
 ```
-- Acesse a aplicação em http://localhost:8080/
+- A aplicação deve estar disponível.
 
 ---
 # Solucionando erros
