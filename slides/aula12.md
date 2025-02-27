@@ -327,6 +327,20 @@ location /projeto1/ {
 ```
 
 ---
+# Atualizando o projeto
+- Para atualizar do Git;
+```sh
+cd pasta-do-projeto
+git pull origin main
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py collectstatic
+sudo systemctl restart projeto_gunicorn.service
+sudo systemctl restart nginx
+```
+
+---
 # Referências
 - https://realpython.com/django-nginx-gunicorn/
 - https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu
