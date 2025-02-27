@@ -300,6 +300,33 @@ sudo tail /var/log/nginx/error.log
 ```
 
 ---
+# Upload de Arquivos
+- O *nginx* impõe um limite de 1 MB no tamanho dos uploads;
+- Caso o usuário tente um upload maior, acontece o erro 413 (*Request Entity Too Large*);
+- É possível aumentar usando a configuração `client_max_body_size tamanho`
+- Ex. `client_max_body_size 10M`
+- Podemos adicionar essa configuração em `/etc/nginx/sites-available/meusite`;
+- Reiniciamos o servidor para aplicar as modificações.
+
+---
+# Upload de Arquivos
+- Exemplo `/etc/nginx/sites-available/meusite`
+```nginx
+server {
+...
+    server_name _;
+
+    client_max_body_size 10M;
+
+...
+    location / {
+        ...
+    }
+...
+}
+```
+
+---
 # Múltiplos projetos
 - É possível rodar mais de um projeto em um mesmo servidor;
 - Caso haja domínios configurados, é possível mudar o `server_name` no *nginx*;
