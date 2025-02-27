@@ -81,7 +81,10 @@ $ quit
 ---
 # Modifique as configurações
 - Modifique o arquivo `settings.py` para configurar os *hosts* e o banco de dados.
-- Adicione `import os` no início do arquivo.
+- Em `ALLOWED_HOSTS` colocamos os IPs e domínios do nosso servidor;
+- É uma boa ideia manter os arquivos estáticos e *media* separados do código;
+- Dessa maneira não precisamos liberar acesso ao nosso diretório;
+- Sugestão: manter `media` e `static` em `/var/www/html/nomedoprojeto/`.
 
 ---
 <style scoped>pre { font-size: 14px; }</style>
@@ -89,7 +92,7 @@ $ quit
 ``` python
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'meusite.com', '111.111.111.111'] #exemplo!
 
 ...
 
@@ -109,12 +112,37 @@ DATABASES = {
 
 ...
 
-STATIC_URL = '/static/'
-STATIC_ROOT=os.path.join(BASE_DIR, 'static/')
+STATIC_URL = "/static/"
+STATIC_ROOT="/var/www/html/nomedoprojeto/static/"
 
-MEDIA_URL='/media/'
-MEDIA_ROOT=os.path.join(BASE_DIR, 'media/')
+MEDIA_URL="/media/"
+MEDIA_ROOT="/var/www/html/nomedoprojeto/media/"
 
+```
+
+---
+# Arquivos estáticos
+- Crie os diretórios necessários em `/var/www/html`
+- Mude o proprietário do diretório para seu usuário:
+`sudo chown -R usuario:usuario /var/www/html/nomedoprojeto`
+
+---
+# *Backend* de Email
+- Podemos configurar um servidor de emails local;
+- Porém hoje em dia qualquer servidor de email *novo* cai em filtros de *spam*;
+- Podemos usar um servidor de emails *famoso* através do SMTP;
+- *Simple Mail Transfer Protocol*.
+
+---
+# *Backend* de Email
+- Exemplo [gmail](https://security.google.com/settings/security/apppasswords)
+```python
+EMAIL_BACKEND = ‘django.core.mail.backends.smtp.EmailBackend’
+EMAIL_HOST = ‘smtp.gmail.com’
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = ‘seuemail@gmail.com’
+EMAIL_HOST_PASSWORD = ‘seu TOKEN!! (ñ é senha)’
 ```
 
 ---
@@ -126,7 +154,7 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-- Colete os arquivos estáticos para a pasta *static*
+- Colete os arquivos estáticos para a pasta de arquivos estáticos
 ``` bash
 python manage.py collectstatic
 ```
@@ -187,7 +215,7 @@ Requires=<projeto>_gunicorn.socket
 User=<user>
 Group=www-data
 WorkingDirectory=/home/<user>/<projeto-django>/
-ExecStart=/home/<user>/<projeto-django>/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/run/<projeto-django>.sock <projeto-django>.wsgi:application
+ExecStart=/home/<user>/<projeto-django>/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/run/<projeto-django>.sock config.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
@@ -227,11 +255,11 @@ server {
        location = /favicon.ico {access_log off;log_not_found off;} 
     
         location /static/ {
-            alias /home/<user>/<projeto-django>/static/;    
+            alias /var/www/html/<projeto-django>/static/;    
         }
 
         location /media/ {
-            alias /home/<user>/<projeto-django>/media/;
+            alias /var/www/html/<projeto-django>/media/;    
         }
     
         location / {
@@ -270,9 +298,32 @@ informações usando:
 ```sh
 sudo tail /var/log/nginx/error.log
 ```
-- Caso haja erros de acesso negado ao acessar o site, dê acesso completo ao seu diretório (o `-R` significa recursivo), reinicie o serviço e o nginx:
-```sh
-chmod -R 777 /home/<usuario>
+
+---
+# Múltiplos projetos
+- É possível rodar mais de um projeto em um mesmo servidor;
+- Caso haja domínios configurados, é possível mudar o `server_name` no *nginx*;
+- Ou usar `subdiretórios`, como `meusite.com/projeto1`, `meusite.com/projeto2`;
+- Pode causar problemas caso as *urls* do sistema não estejam perfeitas!
+
+---
+# Múltiplos projetos
+- Exemplo (nginx)
+```nginx
+location /projeto1/static/ {
+    alias /var/www/html/projeto1/static/;
+}
+
+location /projeto1/static/ {
+    alias /var/www/html/projeto1/media/;
+}
+
+location /projeto1/ {
+    include proxy_params;
+    proxy_set_header SCRIPT_NAME "/projeto1";
+    proxy_pass http://unix:/run/projeto1_gunicorn.sock;
+}
+
 ```
 
 ---
