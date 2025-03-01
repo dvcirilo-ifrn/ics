@@ -80,7 +80,15 @@ $ quit
 
 ---
 # Modifique as configurações
-- Modifique o arquivo `settings.py` para configurar os *hosts* e o banco de dados.
+- No arquivo `settings.py`;
+- Mudamos o modo `DEBUG` para `False`;
+- Configuramos um `SECRET_KEY` específico para produção;
+    - Nunca adicione o `SECRET_KEY` de prod. ao repositório!!
+    - [Documentação](https://docs.djangoproject.com/en/5.1/ref/settings/#secret-key)
+
+---
+# Modifique as configurações
+- Configure o banco de dados, o *SQLite* não é ideal para produção;
 - Em `ALLOWED_HOSTS` colocamos os IPs e domínios do nosso servidor;
 - É uma boa ideia manter os arquivos estáticos e *media* separados do código;
 - Dessa maneira não precisamos liberar acesso ao nosso diretório;
@@ -90,6 +98,8 @@ $ quit
 <style scoped>pre { font-size: 14px; }</style>
 # Modifique as configurações
 ``` python
+SECRET_KEY = "minha chave super segura e longa"
+
 DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'meusite.com', '111.111.111.111'] #exemplo!
