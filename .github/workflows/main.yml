@@ -43,11 +43,16 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Build MkDocs
+        run: |
+          python -m pip install -r requirements.txt
+          python -m mkdocs build
+          
       - name: Ensure build dir exists
         run: mkdir -p site/build
 
       - name: Copy images directory (if exists)
-        run: if [[ -d img ]]; then cp -R img/ site/img; fi
+        run: if [[ -d img ]]; then cp -R img/* site/img/; fi
 
       - name: Marp Build html (build folder)
         uses: docker://marpteam/marp-cli:v4.1.1
@@ -62,11 +67,6 @@ jobs:
           args: --pdf --pdf-outlines --allow-local-files -I slides/ -o site/slides/
         env:
           MARP_USER: root:root
-
-      - name: Build MkDocs
-        run: |
-          python -m pip install -r requirements.txt
-          python -m mkdocs build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
