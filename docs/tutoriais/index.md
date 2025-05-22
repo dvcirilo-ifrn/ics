@@ -13,4 +13,4 @@
 
 ## Links
 
-- [Tutorial 01 - Preparação do ambiente](tutorial01.md)
+- [Tutorial 01 - Instalação do Debian na VM (Virtualbox)](tutorial01.md)
