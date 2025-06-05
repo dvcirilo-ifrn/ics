@@ -34,17 +34,17 @@ Aqui definimos a quantidade de memória e de processadores. Para nosso exemplo, 
 
 O tamanho do disco de armazenamento pode ser mantido em 20GB. Importante perceber que ele não vai ocupar todo de uma vez, esse é o limite até onde esse disco pode crescer.
 
-![Fig10](img/t01-10.png)
-
 ![Fig11](img/t01-11.png)
+
+O VirtualBox vai mostrar um resumo e você deve clicar em *Finalizar*.
 
 ![Fig12](img/t01-12.png)
 
-![Fig13](img/t01-13.png)
-
-![Fig14](img/t01-14.png)
+Depois de criado, basta clicar em *Iniciar*.
 
 ![Fig15](img/t01-15.png)
+
+Na primeira tela de instalação, devemos escolher a opção *Install*. Se não formos rápidos, o sistema entrará automaticamente na opção *Graphical Install* (Instalação gráfica), que **não** é o que queremos. Caso entre na instalação gráfica, basta reiniciar a máquina virtual.
 
 ![Fig16](img/t01-16.png)
 
