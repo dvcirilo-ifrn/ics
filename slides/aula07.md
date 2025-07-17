@@ -206,6 +206,7 @@ $ groups
 $ sudo apt update
 ```
 ---
+<style scoped>section { font-size: 26px; }</style>
 # Exercício
 - Usando comandos com `sudo`:
     - Crie os usuários `visitante` e `john`
