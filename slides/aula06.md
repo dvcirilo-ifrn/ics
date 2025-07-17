@@ -22,7 +22,7 @@ img {
 **Aula 06**: Comandos Linux
 
 ---
-<style scoped>section { font-size: 26px; }</style>
+<style scoped>section { font-size: 24px; }</style>
 # Informações gerais
 
 - No terminal, o espaço onde digitamos comandos é chamado de *prompt* de comando.
