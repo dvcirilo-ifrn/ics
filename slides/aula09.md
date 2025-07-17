@@ -23,7 +23,7 @@ img, table {
 ---
 # Servidores Web mais utilizados
 
-![height:600px](../img/servers.png)
+![height:550px](../img/servers.png)
 
 ---
 # Instalação do Apache2
@@ -66,6 +66,7 @@ $ sudo apt install apache2
 | `a2dismod` | Desabilita módulo |
 
 ---
+<style scoped>section { font-size: 22px; }</style>
 # Sites/VirtualHosts
 ```conf
 <VirtualHost *:80>
@@ -120,6 +121,7 @@ $ sudo apt install apache2
 - É possível configurar com o `chmod 755 <diretorio>`.
 
 ---
+<style scoped>section { font-size: 26px; }</style>
 # Tarefa
 - Crie um novo VirtualHost que aponte para uma pasta na sua *home*
 - Dica: copie as configurações do *default* e modifique o arquivo.
