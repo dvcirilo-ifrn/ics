@@ -97,6 +97,7 @@ img {
     - (entenda o `-` lendo o manual: `man su`)
 
 ---
+<style scoped>section { font-size: 26px; }</style>
 # Grupos
 - Permitem gerenciamento de acesso e permissões para conjuntos de usuários.
 - Para criar novo grupo:
