@@ -53,7 +53,7 @@ $ wget --help
 ```
 
 ---
-<style scoped>section { font-size: 26px; }</style>
+<style scoped>section { font-size: 24px; }</style>
 # Comandos básicos
 - `ls` lista o conteúdo do diretório. Opções úteis:
     - `ls -l` lista detalhes dos arquivos
