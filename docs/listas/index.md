@@ -4,4 +4,3 @@ As listas a seguir servem como guia de estudo para o quiz teórico de cada unida
 
 - [Unidade 1](lista01.md)
 - [Unidade 2](lista02.md)
-- [Unidade 3](lista03.md)
