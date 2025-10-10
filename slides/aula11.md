@@ -42,6 +42,7 @@ $ sudo apt install mariadb-server mariadb-client
 $ sudo systemctl status mariadb
 ```
 ---
+<style scoped>section { font-size: 22px; }</style>
 # Padrão de segurança
 ```sh
 $ sudo mysql_secure_installation
@@ -53,6 +54,7 @@ $ sudo mysql_secure_installation
 - Disallow root login remotely? [Y/n] - Digite `y` e `Enter`.
 - Remove test database and access to it? [Y/n] - Digite `y` e `Enter`.
 - Reload privilege tables now? [Y/n] - Digite `y` e `Enter`.
+
 ---
 # Configuração
 - Para acessar o BD:
@@ -149,7 +151,6 @@ sudo apt install phpmyadmin php-fpm php-mysql
 - O instalador perguntará se deseja configurar para o `Apache` ou para o `lighttpd`, como não usaremos nenhum dos dois, **não marque nenhuma opção** e selecione o *OK*.
 
 ---
-<style scoped>section { font-size: 22px; }</style>
 # phpMyAdmin no nginx
 - Verifique se o arquivo de configurações do site *default* do nginx está com o PHP habilitado:
 ```sh
@@ -161,6 +162,8 @@ sudo nano /etc/nginx/sites-available/default
 index index.html index.htm index.nginx-debian.html index.php;
 ```
 
+---
+# phpMyAdmin no nginx
 - As seguintes linhas devem estar sem comentário. **ATENÇÃO**: ajuste a versão do PHP na linha do php8.2-fpm.sock, caso sua versão não seja a 8.2.
 ```sh
 # pass PHP scripts to FastCGI server
