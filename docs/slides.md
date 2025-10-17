@@ -15,6 +15,7 @@
 | 08  | Configurações e acesso remoto              | [:material-presentation:](aula08.html) - [:material-file-pdf-box:](aula08.pdf) |
 | 09  | Servidor Apache                            | [:material-presentation:](aula09.html) - [:material-file-pdf-box:](aula09.pdf) |
 | 10  | Servidor Nginx                             | [:material-presentation:](aula10.html) - [:material-file-pdf-box:](aula10.pdf) |
-| 11  | Banco de Dados MySQL/mariadb               | [:material-presentation:](aula11.html) - [:material-file-pdf-box:](aula11.pdf) |
-| 12  | Deploy de um sistema Django                | [:material-presentation:](aula12.html) - [:material-file-pdf-box:](aula12.pdf) |
+| 11  | Segurança no acesso remoto                 | [:material-presentation:](aula11.html) - [:material-file-pdf-box:](aula11.pdf) |
+| 12  | Banco de Dados MySQL/mariadb               | [:material-presentation:](aula12.html) - [:material-file-pdf-box:](aula12.pdf) |
+| 13  | Deploy de um sistema Django                | [:material-presentation:](aula13.html) - [:material-file-pdf-box:](aula13.pdf) |
 

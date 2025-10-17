@@ -4,7 +4,7 @@ theme: default
 paginate: true
 _paginate: false
 size: 4:3
-title: Aula 11: Banco de Dados MySQL/mariadb
+title: Aula 11: Segurança no acesso remoto
 author: Diego Cirilo
 ---
 <style>
@@ -18,172 +18,164 @@ img, table {
 
 ### Prof. Diego Cirilo
 
-**Aula 11**: Banco de Dados MySQL/MariaDB
+**Aula 11**: Segurança no acesso remoto
 
 ---
-# MySQL/MariaDB
+# SSH
 
-- Sistema de gerenciamento de Banco de Dados Relacional (RDBMS);
-- Criado em 1995 por David Axmark e Michael Widenius, na Suécia;
-- My (filha de Widenius) + SQL;
-- Software Livre, porém desenvolvido atualmente pela Oracle;
-- Widenius criou um fork em 2010 chamado MariaDB, nome de sua filha mais nova.
-
----
-# Instalação
-
-- O MySQL não faz parte dos repositórios do Debian, MariaDB sim.
-- Instalação:
-```sh
-$ sudo apt install mariadb-server mariadb-client
-```
-- Verifique o funcionamento:
-```sh
-$ sudo systemctl status mariadb
-```
----
-<style scoped>section { font-size: 22px; }</style>
-# Padrão de segurança
-```sh
-$ sudo mysql_secure_installation
-```
-- Enter current password for root (enter for none): - Aperte `Enter` já que ainda não há senha de *root*
-- Switch to unix_socket authentication [Y/n] - `n` para pular.
-- Set root password? [Y/n] - Digite `y` e aperte `Enter` para criar uma senha forte de `root` para seu BD. 
-- Remove anonymous users? [Y/n] - Digite `y` e `Enter`.
-- Disallow root login remotely? [Y/n] - Digite `y` e `Enter`.
-- Remove test database and access to it? [Y/n] - Digite `y` e `Enter`.
-- Reload privilege tables now? [Y/n] - Digite `y` e `Enter`.
+- SSH (Secure Shell): protocolo de acesso remoto criptografado
+- Permite: 
+    - executar comandos
+    - transferir arquivos
+    - administrar servidores.  
+- SSH substituiu protocolos inseguros como Telnet e rlogin.  
 
 ---
-# Configuração
-- Para acessar o BD:
-```sh
-$ sudo mysql -u root
-```
-- Crie um usuário administrador:
-```sql
-CREATE USER 'admin'@localhost IDENTIFIED BY 'senhaadmin';
-```
-- Dê permissões totais:
-```sql
-GRANT ALL PRIVILEGES ON *.* TO 'admin'@localhost IDENTIFIED BY 'senhaadmin';
-```
-- Atualize as permissões:
-```sql
-FLUSH PRIVILEGES;
-```
-- Saia do MariaDB: `quit`
+# Funcionamento do SSH
+
+1. O cliente inicia a conexão  
+2. O servidor se autentica enviando sua chave pública  
+3. O cliente valida a identidade do servidor  
+4. A comunicação é criptografada de ponta a ponta  
 
 ---
-# phpMyAdmin no Apache
+# Métodos de Autenticação
 
-- Cliente web para MySQL/MariaDB;
-- Funciona em PHP, que deve estar ativado no servidor web (Apache/Nginx);
-- O Debian já possui o pacote do phpMyAdmin.
-- Instale os pacotes do PHP:
-```sh
-$ sudo apt install php php-cgi php-mysqli php-pear php-mbstring libapache2-mod-php php-common php-phpseclib php-mysql
-```
-- Verifique a instalação:
-```sh
-$ php --version
-```
+- Senhas: o usuário informa login e senha a cada conexão  
+- Chaves SSH: o usuário usa um par de chaves (pública e privada) para autenticação automática e mais segura  
 
 ---
-# phpMyAdmin no Apache
-- Baixe o phpMyAdmin do site:
-```sh
-$ wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz
-```
-- Crie uma pasta na raiz do servidor web (`/var/www/html/`)
-```sh
-$ sudo mkdir /var/www/html/phpMyAdmin
-```
-- Descompacte a pasta para o servidor web:
-```sh
-$ sudo tar xvf phpMyAdmin-latest-all-languages.tar.gz --strip-components=1 -C /var/www/html/phpMyAdmin
-```
+# Chave Pública e Privada
+
+- As chaves SSH são baseadas em criptografia assimétrica;
+    - Só funcionam juntas como um par matematicamente relacionado.  
+    - Mesma lógica de vários sistemas de autenticação atuais.
+- Chave Privada: permanece no cliente; deve ser protegida e nunca compartilhada  
+- Chave Pública: é enviada ao servidor; usada para verificar a autenticidade do cliente  
 
 ---
-# phpMyAdmin no Apache
-- Copie a configuração padrão:
-```sh
-$ sudo cp /var/www/html/phpMyAdmin/config.sample.inc.php /var/www/html/phpMyAdmin/config.inc.php
-```
+# Processo de Autenticação com Chaves
 
-- Edite a configuração para modificar a senha:
-```sh
-sudo nano /var/www/html/phpMyAdmin/config.inc.php
-```
-
-- Mude de:
-```sh
-$cfg['blowfish_secret'] = '';
-```
-- Para:
-```sh
-$cfg['blowfish_secret'] = 'Sua-Nova-Senha-Complexa';
-```
----
-# phpMyAdmin no Apache
-- Mude as permissões do arquivo:
-```sh
-sudo chmod 660 /var/www/html/phpMyAdmin/config.inc.php
-```
-- Mude o dono para o usuário do Apache:
-```sh
-sudo chown -R www-data:www-data /var/www/html/phpMyAdmin
-```
-- Reinicie o Apache2:
-```sh
-sudo systemctl restart apache2
-```
-- Acesse em http://localhost:8080/phpMyAdmin
+1. O servidor armazena a chave pública do usuário autorizado  
+2. O cliente inicia a conexão e apresenta sua chave pública  
+3. O servidor envia um desafio criptografado com essa chave  
+4. O cliente responde usando sua chave privada  
+5. Se a resposta for válida, o acesso é concedido  
 
 ---
-# phpMyAdmin no nginx
+# Vantagens
 
-- Instale o pacote do *phpMyAdmin* e as dependências do *php*
-```sh
-sudo apt install phpmyadmin php-fpm php-mysql
-```
-- O instalador perguntará se deseja configurar para o `Apache` ou para o `lighttpd`, como não usaremos nenhum dos dois, **não marque nenhuma opção** e selecione o *OK*.
+- Elimina o uso de senhas, evitando ataques de força bruta  
+- Permite automação segura de tarefas e deploys  
+- Oferece autenticação forte baseada em criptografia  
+- Facilita o uso de agentes de autenticação (`ssh-agent`)  
+- Pode ser protegida por uma senha local (*passphrase*)  
 
 ---
-# phpMyAdmin no nginx
-- Verifique se o arquivo de configurações do site *default* do nginx está com o PHP habilitado:
-```sh
-sudo nano /etc/nginx/sites-available/default
+# Geração de Chaves SSH
+
+- `-t` tipo de criptografia, atualmente o ed25519 é recomendável. 
+- `-C` comentário, facilita na identificação das chaves.
+
 ```
-- Adicione `index.php` à lista de arquivos padrão:
+ssh-keygen -t ed25519 -C "seu_email@exemplo.com"
 ```
-# Add index.php to the list if you are using PHP
-index index.html index.htm index.nginx-debian.html index.php;
+
+Por padrão o comando gera dois arquivos em `~/.ssh/`:
+
+- `id_ed25519` (chave privada)  
+- `id_ed25519.pub` (chave pública)  
+
+---
+# Adicionando a Chave ao Servidor
+
+Para autorizar o acesso, copie a chave pública para o servidor:
+
+```
+ssh-copy-id usuario@servidor
+```
+
+Ou manualmente:
+
+- Copie o conteúdo de `id_ed25519.pub`  
+- Adicione ao arquivo `~/.ssh/authorized_keys` no servidor  
+
+> Em plataformas de *cloud* é necessário usar as ferramentas da própria platorma.
+
+---
+# Adicionando chaves ao Google Cloud
+- Acesse o Compute Engine (https://console.cloud.google.com/compute)
+- No menu do lado esquerdo acesse *Configurações/Metadados*
+- Acesse a aba *Chaves SSH* e use a opção *+ Adicionar item*
+- Cole sua chave pública no campo que vai aparecer e salve.
+
+---
+# Protegendo a Chave Privada
+
+- Mantenha a chave privada apenas no seu computador  
+- Use permissões restritas:
+
+```
+chmod 600 ~/.ssh/id_ed25519
+```
+
+- Use uma passphrase para proteger o arquivo  
+- **Nunca** envie a chave privada por e-mail ou mensagens  
+
+---
+# Agente SSH
+
+O `ssh-agent` armazena chaves privadas na memória, evitando digitar a senha repetidamente.
+
+Iniciar e adicionar a chave:
+
+```
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
 ```
 
 ---
-# phpMyAdmin no nginx
-- As seguintes linhas devem estar sem comentário. **ATENÇÃO**: ajuste a versão do PHP na linha do php8.2-fpm.sock, caso sua versão não seja a 8.2.
-```sh
-# pass PHP scripts to FastCGI server
-    #
-    location ~ \.php$ { include snippets/fastcgi-php.conf;
+# Desabilitando o Acesso por Senha
 
-            # With php-fpm (or other unix sockets):
-            fastcgi_pass unix:/run/php/php8.2-fpm.sock;
-    #       # With php-cgi (or other tcp sockets):
-    #       fastcgi_pass 127.0.0.1:9000;
-    }
+- É possível desativar o acesso por senha.
+- No servidor, edite o arquivo `/etc/ssh/sshd_config`:
+
 ```
+PasswordAuthentication no
+PubkeyAuthentication yes
+```
+
+- Reinicie o serviço SSH:
+
+```
+sudo systemctl restart ssh
+```
+
+> ATENÇÃO: só é possível acessar com as chaves, e caso sejam perdidas, não é mais possível acessar o servidor remotamente!
 
 ---
-# phpMyAdmin no nginx
-- Crie um link simbólico para o phpMyAdmin na pasta `/var/www/html`
-```sh
-sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
-```
-- Reinicie o *nginx* e verifique o funcionamento em http://localhost:8080/phpmyadmin
+# Boas práticas
+
+- Identificar e documentar onde cada chave é usada  
+- Utilizar nomes descritivos ao criar chaves  
+- Revogar chaves antigas ou comprometidas  
+- Limitar o acesso de cada chave a servidores específicos  
+- Evitar chaves compartilhadas entre usuários  
+
+---
+# Reuso de Chaves SSH
+
+- Facilita o acesso, porém aumenta o impacto de um possível vazamento  
+- Se a chave for comprometida, todos os servidores que a aceitam ficam vulneráveis  
+- Idealmente, cada cliente ou grupo de cliente deve ter sua própria chave  
+
+---
+# Boas práticas
+
+- Gere pares de chaves diferentes para contextos distintos (trabalho, pessoal, automação)  
+- Use um agente SSH para facilitar o uso de múltiplas chaves  
+- Revogue imediatamente qualquer chave reutilizada que tenha sido exposta  
+- Automatize a rotação periódica das chaves  
 
 ---
 # <!--fit--> Dúvidas? 🤔
