@@ -67,16 +67,17 @@ $ pip install mysqlclient gunicorn
 ---
 # Configure o banco de dados
 
-- Crie um usuário e uma tabela no banco para seu projeto (nunca rode como *root*)
-- **Substitua o `<exemplo>` com suas informações**
+- Acesse o MySQL como administrador via terminal, MySQL Workbench, phpMyAdmin, etc;
+- Execute:
 
-``` bash
-$ sudo mysql -u root -p
-$ CREATE DATABASE <banco-do-app> CHARACTER SET 'utf8';
-$ CREATE USER <user-do-app>;
-$ GRANT ALL ON <banco-do-app>.* TO '<user-do-app>'@'localhost' IDENTIFIED BY '<senha-do-user-do-app>';
-$ quit
+```sql
+CREATE DATABASE <banco-do-app> CHARACTER SET 'utf8';
+CREATE USER <user-do-app>;
+GRANT ALL ON <banco-do-app>.* TO '<user-do-app>'@'localhost' IDENTIFIED BY '<senha-do-user-do-app>';
+quit
 ```
+
+> **Substitua o `<exemplo>` com suas informações**
 
 ---
 # Modifique as configurações

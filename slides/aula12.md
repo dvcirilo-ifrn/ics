@@ -125,9 +125,6 @@ quit
 ---
 # phpMyAdmin no nginx
 
-- Cliente web para MySQL/MariaDB;
-- Funciona em PHP, que deve estar ativado no servidor web (Apache/Nginx);
-- O Debian já possui o pacote do phpMyAdmin.
 - Instale o pacote do *phpMyAdmin* e as dependências do *php*
 ```sh
 sudo apt install phpmyadmin php-fpm php-mysql
