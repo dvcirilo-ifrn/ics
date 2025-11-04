@@ -56,7 +56,7 @@ $ sudo mysql_secure_installation
 - Reload privilege tables now? [Y/n] - Digite `y` e `Enter`.
 
 ---
-<style scoped>section { font-size: 24px; }</style>
+<style scoped>section { font-size: 22px; }</style>
 # Configuração
 - Para acessar o BD:
 ```sh
@@ -81,8 +81,8 @@ FLUSH PRIVILEGES;
 
 - Normalmente os usuários do BD só tem acesso aos seus bancos;
 - Além de mais seguro, evita erros;
-- Acesse o BD como `root`:
-    - `sudo mysql -u root`
+- Acesse o BD como `root` ou `admin`;
+- Execute os seguintes comandos SQL:
 ```sql
 CREATE DATABASE nome_do_banco CHARACTER SET 'utf8';
 CREATE USER nome_do_user;
@@ -101,6 +101,7 @@ quit
 - Podemos também usar ferramentas gráficas como o MySQL Workbench ou phpMyAdmin.
 
 ---
+<style scoped>section { font-size: 24px; }</style>
 # Acesso remoto com MySQL Workbench
 
 - Na janela de "nova conexão" escolhemos o "Connection Method" *Standard TCP/IP over SSH*
@@ -111,6 +112,15 @@ quit
     - *MySQL Hostname* e *MySQL Server Port*: pode deixar o padrão;
     - *Username* e *Password*: dados do usuário do MySQL. Ex. `admin` e `senhaadmin`;
 - Não esqueça de definir um *Connection Name* para poder salvar.
+
+---
+# phpMyAdmin
+
+- Cliente web para MySQL/MariaDB;
+- Funciona em PHP, que deve estar ativado no servidor web (Apache/Nginx);
+- O Debian já possui o pacote do phpMyAdmin.
+- Também é possível instalar manualmente, baixando os arquivos no site oficial;
+- [phpMyAdmin](https://www.phpmyadmin.net/)
 
 ---
 # phpMyAdmin no nginx
@@ -138,7 +148,8 @@ index index.html index.htm index.nginx-debian.html index.php;
 
 ---
 # phpMyAdmin no nginx
-- As seguintes linhas devem estar sem comentário. **ATENÇÃO**: ajuste a versão do PHP na linha do php8.2-fpm.sock, caso sua versão não seja a 8.2.
+- As seguintes linhas devem estar sem comentário:
+
 ```sh
 # pass PHP scripts to FastCGI server
     #
@@ -150,14 +161,16 @@ index index.html index.htm index.nginx-debian.html index.php;
     #       fastcgi_pass 127.0.0.1:9000;
     } # LEMBRE DESSE!
 ```
+> **ATENÇÃO**: ajuste a versão do PHP na linha do php8.2-fpm.sock, caso sua versão não seja a 8.2.
 
 ---
 # phpMyAdmin no nginx
+
 - Crie um link simbólico para o phpMyAdmin na pasta `/var/www/html`
 ```sh
 sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 ```
-- Reinicie o *nginx* e verifique o funcionamento em http://seu-endereco/phpmyadmin
+- Reinicie o *nginx* e verifique o funcionamento em http://endereco-do-servidor/phpmyadmin
 
 ---
 # <!--fit--> Dúvidas? 🤔
