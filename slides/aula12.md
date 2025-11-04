@@ -56,6 +56,7 @@ $ sudo mysql_secure_installation
 - Reload privilege tables now? [Y/n] - Digite `y` e `Enter`.
 
 ---
+<style scoped>section { font-size: 24px; }</style>
 # Configuração
 - Para acessar o BD:
 ```sh
@@ -76,74 +77,47 @@ FLUSH PRIVILEGES;
 - Saia do MariaDB: `quit`
 
 ---
-# phpMyAdmin no Apache
+# Criando usuário específico para um banco
 
-- Cliente web para MySQL/MariaDB;
-- Funciona em PHP, que deve estar ativado no servidor web (Apache/Nginx);
-- O Debian já possui o pacote do phpMyAdmin.
-- Instale os pacotes do PHP:
-```sh
-$ sudo apt install php php-cgi php-mysqli php-pear php-mbstring libapache2-mod-php php-common php-phpseclib php-mysql
-```
-- Verifique a instalação:
-```sh
-$ php --version
-```
-
----
-# phpMyAdmin no Apache
-- Baixe o phpMyAdmin do site:
-```sh
-$ wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz
-```
-- Crie uma pasta na raiz do servidor web (`/var/www/html/`)
-```sh
-$ sudo mkdir /var/www/html/phpMyAdmin
-```
-- Descompacte a pasta para o servidor web:
-```sh
-$ sudo tar xvf phpMyAdmin-latest-all-languages.tar.gz --strip-components=1 -C /var/www/html/phpMyAdmin
+- Normalmente os usuários do BD só tem acesso aos seus bancos;
+- Além de mais seguro, evita erros;
+- Acesse o BD como `root`:
+    - `sudo mysql -u root`
+```sql
+CREATE DATABASE nome_do_banco CHARACTER SET 'utf8';
+CREATE USER nome_do_user;
+GRANT ALL ON nome_do_banco.* TO 'nome_do_user'@'localhost' IDENTIFIED BY 'senha_do_user';
+quit
 ```
 
 ---
-# phpMyAdmin no Apache
-- Copie a configuração padrão:
-```sh
-$ sudo cp /var/www/html/phpMyAdmin/config.sample.inc.php /var/www/html/phpMyAdmin/config.inc.php
-```
+# Acesso remoto
 
-- Edite a configuração para modificar a senha:
-```sh
-sudo nano /var/www/html/phpMyAdmin/config.inc.php
-```
+- Podemos acessar o BD diretamente no terminal:
+    - Acesse o servidor via SSH;
+        - `$ mysql -u admin`
+        - Onde `admin` é o nome de usuário.
+    - Esse terminal permite a execução direta de comandos SQL;
+- Podemos também usar ferramentas gráficas como o MySQL Workbench ou phpMyAdmin.
 
-- Mude de:
-```sh
-$cfg['blowfish_secret'] = '';
-```
-- Para:
-```sh
-$cfg['blowfish_secret'] = 'Sua-Nova-Senha-Complexa';
-```
 ---
-# phpMyAdmin no Apache
-- Mude as permissões do arquivo:
-```sh
-sudo chmod 660 /var/www/html/phpMyAdmin/config.inc.php
-```
-- Mude o dono para o usuário do Apache:
-```sh
-sudo chown -R www-data:www-data /var/www/html/phpMyAdmin
-```
-- Reinicie o Apache2:
-```sh
-sudo systemctl restart apache2
-```
-- Acesse em http://localhost:8080/phpMyAdmin
+# Acesso remoto com MySQL Workbench
+
+- Na janela de "nova conexão" escolhemos o "Connection Method" *Standard TCP/IP over SSH*
+    - *SSH Hostname*: IP do servidor remoto
+    - *SSH Username*: usuário do servidor remoto
+    - *SSH Password*: senha do servidor remoto (apenas quando não usarmos chave);
+    - *SSH Key File*: chave privada. Procure as chaves que criou localmente e configurou no servidor remoto;
+    - *MySQL Hostname* e *MySQL Server Port*: pode deixar o padrão;
+    - *Username* e *Password*: dados do usuário do MySQL. Ex. `admin` e `senhaadmin`;
+- Não esqueça de definir um *Connection Name* para poder salvar.
 
 ---
 # phpMyAdmin no nginx
 
+- Cliente web para MySQL/MariaDB;
+- Funciona em PHP, que deve estar ativado no servidor web (Apache/Nginx);
+- O Debian já possui o pacote do phpMyAdmin.
 - Instale o pacote do *phpMyAdmin* e as dependências do *php*
 ```sh
 sudo apt install phpmyadmin php-fpm php-mysql
@@ -174,7 +148,7 @@ index index.html index.htm index.nginx-debian.html index.php;
             fastcgi_pass unix:/run/php/php8.2-fpm.sock;
     #       # With php-cgi (or other tcp sockets):
     #       fastcgi_pass 127.0.0.1:9000;
-    }
+    } # LEMBRE DESSE!
 ```
 
 ---
@@ -183,7 +157,7 @@ index index.html index.htm index.nginx-debian.html index.php;
 ```sh
 sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 ```
-- Reinicie o *nginx* e verifique o funcionamento em http://localhost:8080/phpmyadmin
+- Reinicie o *nginx* e verifique o funcionamento em http://seu-endereco/phpmyadmin
 
 ---
 # <!--fit--> Dúvidas? 🤔
