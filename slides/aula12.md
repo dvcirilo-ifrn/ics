@@ -147,17 +147,19 @@ index index.html index.htm index.nginx-debian.html index.php;
 # phpMyAdmin no nginx
 - As seguintes linhas devem estar sem comentário:
 
-```sh
+```conf
 # pass PHP scripts to FastCGI server
-    #
-    location ~ \.php$ { include snippets/fastcgi-php.conf;
+        #
+        location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
 
-            # With php-fpm (or other unix sockets):
-            fastcgi_pass unix:/run/php/php8.2-fpm.sock;
-    #       # With php-cgi (or other tcp sockets):
-    #       fastcgi_pass 127.0.0.1:9000;
-    } # LEMBRE DESSE!
+                # With php-fpm (or other unix sockets):
+                fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+                # With php-cgi (or other tcp sockets):
+        #       fastcgi_pass 127.0.0.1:9000;
+        } # LEMBRE DESSE!!
 ```
+
 > **ATENÇÃO**: ajuste a versão do PHP na linha do php8.2-fpm.sock, caso sua versão não seja a 8.2.
 
 ---
