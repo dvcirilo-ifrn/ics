@@ -1,6 +1,7 @@
 # Tutoriais
 
 ## Orientações
+
 !!! warning "Atenção!"
     Os tutoriais são descrições passo-a-passo de como realizar alguma tarefa.
     É importante que você estude e compreenda o conteúdo das aulas, aí sim você pode seguir o tutorial.
@@ -14,3 +15,4 @@
 ## Links
 
 - [Tutorial 01 - Instalação do Debian na VM (Virtualbox)](tutorial01.md)
+- [Tutorial 02 - Criação de Instância de VM no Google Cloud](tutorial02.md)
