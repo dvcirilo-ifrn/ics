@@ -12,6 +12,7 @@ nav:
   - Tutoriais:
     - 'tutoriais/index.md'
     - 'Instalação do Debian na VM': 'tutoriais/tutorial01.md'
+    - 'Criação de Instância de VM no Google Cloud': 'tutoriais/tutorial02.md'
     # - 'Iniciando um projeto Django': 'tutoriais/tutorial02.md'
     # - 'Convertendo um site estático para templates Django': 'tutoriais/tutorial04.md'
     # - 'Enviando dados da view para o template': 'tutoriais/tutorial04.md'

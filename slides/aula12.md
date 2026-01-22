@@ -125,11 +125,14 @@ quit
 ---
 # phpMyAdmin no nginx
 
+- Verifique se o *nginx* está instalado e funcionando!
 - Instale o pacote do *phpMyAdmin* e as dependências do *php*
+
 ```sh
 sudo apt install phpmyadmin php-fpm php-mysql
 ```
 - O instalador perguntará se deseja configurar para o `Apache` ou para o `lighttpd`, como não usaremos nenhum dos dois, **não marque nenhuma opção** e selecione o *OK*.
+- Na sequência perguntará se deve ser feita a configuração (*yes*) e pedirá uma senha, que pode ficar em branco. O instalador gera uma senha forte, nesse caso.
 
 ---
 # phpMyAdmin no nginx
