@@ -41,22 +41,7 @@ img, table {
 ---
 # Virtualização x Conteinerização
 
-**Máquinas Virtuais:**
-- Virtualizam hardware completo
-- Cada VM possui SO completo
-- Overhead maior (GB de memória)
-- Inicialização lenta (minutos)
-- Isolamento forte
-
----
-# Virtualização x Conteinerização
-
-**Containers:**
-- Virtualizam sistema operacional
-- Compartilham kernel do host
-- Leves (MB de memória)
-- Inicialização rápida (segundos)
-- Isolamento em nível de processo
+![width:800px](../img/vm_vs_container.svg)
 
 ---
 # Engines de Conteinerização
@@ -70,6 +55,8 @@ img, table {
 
 ---
 # Docker
+
+![bg right:30% 80%](../img/docker_logo.svg)
 
 - Criado por Solomon Hykes na dotCloud em 2013
 - Open source desde o início
@@ -135,6 +122,8 @@ docker images
 
 ---
 # Dockerfile
+
+![bg right:35% 90%](../img/docker_layers.svg)
 
 - Arquivo de texto com instruções para construir uma imagem
 - Cada instrução cria uma camada (*layer*) na imagem
@@ -249,7 +238,7 @@ docker rm nome-container
 ---
 # Docker Hub
 
-- Registry público oficial do Docker
+- *Registry* público oficial do Docker
 - Milhares de imagens oficiais e da comunidade
 - Imagens oficiais: `python`, `nginx`, `postgres`, `node`, etc.
 - URL: https://hub.docker.com
@@ -275,6 +264,8 @@ docker push usuario/meu-app:1.0
 
 ---
 # Docker Compose
+
+![bg right:35% 90%](../img/docker_compose.jpg)
 
 - Ferramenta para definir e executar aplicações multi-container
 - Usa arquivo YAML para configuração
@@ -708,10 +699,254 @@ Considerações adicionais para produção:
 - Use um registry privado para imagens
 
 ---
+# Plataformas de Deploy na Nuvem
+
+- Principais provedores oferecem serviços para deploy de containers
+- Eliminam a necessidade de gerenciar servidores
+- Escalabilidade automática
+- Modelo de pagamento por uso
+- HTTPS automático
+
+---
+# Principais Plataformas
+
+![bg right:30% 80%](../img/cloud_platforms.png)
+
+- **Google Cloud Run**: containers serverless, escala até zero
+- **Azure Container Apps**: similar ao Cloud Run, integrado ao Azure
+- **AWS App Runner**: deploy simplificado na AWS
+- **AWS ECS/Fargate**: mais controle, maior complexidade
+- **DigitalOcean App Platform**: simples e acessível
+- **Fly.io**: fácil de usar, boa camada gratuita
+
+---
+<style scoped>section { font-size: 22px; }</style>
+# Comparativo de Plataformas
+
+| Plataforma | Escala p/ Zero | Preço Inicial | Complexidade |
+|------------|----------------|---------------|--------------|
+| Cloud Run | Sim | Gratuito* | Baixa |
+| Azure Container Apps | Sim | Gratuito* | Baixa |
+| AWS App Runner | Não | ~$5/mês | Baixa |
+| DigitalOcean | Não | $5/mês | Baixa |
+| Fly.io | Sim | Gratuito* | Baixa |
+
+*Camada gratuita com limites
+
+---
+# Google Cloud Run
+
+![bg right:30% 80%](../img/cloud_run_logo.png)
+
+- Serviço serverless para executar containers
+- Escala automaticamente de 0 a N instâncias
+- Paga apenas pelo tempo de execução
+- Suporta qualquer linguagem/framework
+- HTTPS automático
+- Camada gratuita generosa
+
+---
+# Pré-requisitos para Cloud Run
+
+- Conta no Google Cloud (https://cloud.google.com)
+- Projeto criado no Google Cloud Console
+- Google Cloud CLI (`gcloud`) instalado
+- Docker instalado localmente
+
+---
+# Instalando o Google Cloud CLI
+
+No Linux:
+```bash
+curl https://sdk.cloud.google.com | bash
+exec -l $SHELL
+gcloud init
+```
+
+No Windows, baixe o instalador em:
+https://cloud.google.com/sdk/docs/install
+
+---
+# Configuração Inicial
+
+```bash
+# Login na conta Google
+gcloud auth login
+
+# Configurar projeto
+gcloud config set project SEU_PROJECT_ID
+
+# Habilitar APIs necessárias
+gcloud services enable run.googleapis.com
+gcloud services enable cloudbuild.googleapis.com
+```
+
+---
+# Tutorial: Django no Cloud Run
+
+Estrutura do projeto:
+```
+projeto/
+├── config/
+│   ├── settings.py
+│   └── wsgi.py
+├── app/
+├── manage.py
+├── requirements.txt
+├── Dockerfile
+└── .dockerignore
+```
+
+---
+<style scoped>pre { font-size: 13px; }</style>
+# Dockerfile para Cloud Run
+
+```dockerfile
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+
+WORKDIR /app
+
+# Dependências Python
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copia código
+COPY . .
+
+# Coleta arquivos estáticos
+RUN python manage.py collectstatic --noinput
+
+# Cloud Run usa a variável PORT
+CMD exec gunicorn --bind :$PORT --workers 2 config.wsgi:application
+```
+
+---
+# requirements.txt
+
+```txt
+Django>=4.2,<5.0
+gunicorn>=21.0
+```
+
+Adicione outras dependências conforme necessário.
+
+---
+<style scoped>section { font-size: 20px; }</style>
+# Configuração do Django para Cloud Run
+
+No `settings.py`:
+
+```python
+import os
+
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'chave-desenvolvimento')
+
+ALLOWED_HOSTS = ['*']
+
+# Configurações de segurança para HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Arquivos estáticos
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+```
+
+---
+# Deploy no Cloud Run
+
+Build e deploy em um único comando:
+```bash
+gcloud run deploy django-app \
+    --source . \
+    --region southamerica-east1 \
+    --allow-unauthenticated
+```
+
+O comando irá:
+1. Fazer build da imagem usando Cloud Build
+2. Enviar para o Container Registry
+3. Fazer deploy no Cloud Run
+
+---
+# Deploy com Variáveis de Ambiente
+
+```bash
+gcloud run deploy django-app \
+    --source . \
+    --region southamerica-east1 \
+    --allow-unauthenticated \
+    --set-env-vars "DEBUG=False" \
+    --set-env-vars "SECRET_KEY=sua-chave-secreta"
+```
+
+---
+# Atualizando o Deploy
+
+Após modificações no código:
+
+```bash
+gcloud run deploy django-app \
+    --source . \
+    --region southamerica-east1
+```
+
+O Cloud Run mantém as configurações anteriores.
+
+---
+# Comandos Úteis
+
+```bash
+# Listar serviços
+gcloud run services list
+
+# Ver detalhes do serviço
+gcloud run services describe django-app \
+    --region southamerica-east1
+
+# Ver logs
+gcloud run services logs read django-app \
+    --region southamerica-east1
+
+# Deletar serviço
+gcloud run services delete django-app \
+    --region southamerica-east1
+```
+
+---
+# Domínio Personalizado
+
+```bash
+# Mapear domínio
+gcloud run domain-mappings create \
+    --service django-app \
+    --domain meusite.com.br \
+    --region southamerica-east1
+```
+
+Configure os registros DNS conforme instruções.
+O certificado SSL é gerado automaticamente.
+
+---
+# Custos do Cloud Run
+
+- **Camada gratuita**: 2 milhões de requisições/mês
+- **CPU**: cobrado por segundo de uso
+- **Memória**: cobrado por segundo de uso
+- **Escala para zero**: não cobra quando inativo
+
+Para projetos pequenos, o custo pode ser zero.
+
+---
 # Alternativas e Próximos Passos
 
 - **Docker Swarm**: orquestração nativa do Docker
-- **Kubernetes**: orquestração avançada de containers
+- **Kubernetes/GKE**: orquestração avançada de containers
 - **Portainer**: interface gráfica para gerenciar Docker
 - **Traefik**: proxy reverso com suporte a containers
 - **CI/CD**: integração com GitHub Actions, GitLab CI, etc.
@@ -722,8 +957,9 @@ Considerações adicionais para produção:
 - https://docs.docker.com/
 - https://docs.docker.com/compose/
 - https://hub.docker.com/
+- https://cloud.google.com/run/docs
+- https://azure.microsoft.com/pt-br/products/container-apps
 - https://docs.djangoproject.com/en/5.0/howto/deployment/
-- https://www.postgresql.org/docs/
 - https://gunicorn.org/
 - https://nginx.org/en/docs/
 
