@@ -13,14 +13,14 @@ nav:
     - 'tutoriais/index.md'
     - 'Instalação do Debian na VM': 'tutoriais/tutorial01.md'
     - 'Criação de Instância de VM no Google Cloud': 'tutoriais/tutorial02.md'
-    # - 'Iniciando um projeto Django': 'tutoriais/tutorial02.md'
-    # - 'Convertendo um site estático para templates Django': 'tutoriais/tutorial04.md'
-    # - 'Enviando dados da view para o template': 'tutoriais/tutorial04.md'
+    - 'Deploy de sistema Django no GCloud': 'tutoriais/tutorial09.md'
+    - 'Deploy de sistema Django com Docker': 'tutoriais/tutorial10.md'
   - Listas:
     - 'listas/index.md'
     - 'Lista 01': listas/lista01.md
     - 'Lista 02': listas/lista02.md
     - 'Lista 03': listas/lista03.md
+    - 'Lista 04': listas/lista04.md
 markdown_extensions:
   - admonition
   - attr_list

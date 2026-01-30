@@ -16,4 +16,5 @@
 
 - [Tutorial 01 - Instalação do Debian na VM (Virtualbox)](tutorial01.md)
 - [Tutorial 02 - Criação de Instância de VM no Google Cloud](tutorial02.md)
-- [Tutorial 11 - Deploy de Django com Docker Compose](tutorial11.md)
+- [Tutorial 03 - Deploy de sistema Django no GCloud](tutorial09.md)
+- [Tutorial 04 - Deploy de Django com Docker Compose](tutorial10.md)
