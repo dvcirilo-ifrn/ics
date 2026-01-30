@@ -50,13 +50,12 @@ img, table {
 - **Podman**: alternativa sem daemon, mais segura
 - **LXC/LXD**: containers de sistema completo
 - **containerd**: runtime de containers (usado pelo Docker e Kubernetes)
-- **CRI-O**: runtime para Kubernetes
-- **rkt**: descontinuado em 2020
 
 ---
+<style scoped>section { font-size: 26px; }</style>
 # Docker
 
-![bg right:30% 80%](../img/docker_logo.svg)
+![bg right:40% 85%](../img/docker_logo.png)
 
 - Criado por Solomon Hykes na dotCloud em 2013
 - Open source desde o início
@@ -85,16 +84,9 @@ img, table {
 - **Network**: rede para comunicação entre containers
 
 ---
-# Instalação do Docker
+# Instalação do Docker no Debian/Ubuntu
 
-No Debian/Ubuntu:
-
-```bash
-sudo apt update
-sudo apt install docker.io docker-compose
-sudo systemctl start docker
-sudo systemctl enable docker
-```
+- [Documentação oficial](https://docs.docker.com/engine/install/debian/)
 
 Adicionar usuário ao grupo docker:
 ```bash
@@ -115,23 +107,30 @@ Listar containers em execução:
 docker ps
 ```
 
+Listar todos os containers:
+```bash
+docker ps -a
+```
+
 Listar todas as imagens:
 ```bash
 docker images
 ```
 
 ---
+<style scoped>section { font-size: 24px; }</style>
 # Dockerfile
 
-![bg right:35% 90%](../img/docker_layers.svg)
+![bg right:47% 104%](../img/docker_layers.svg)
 
 - Arquivo de texto com instruções para construir uma imagem
 - Cada instrução cria uma camada (*layer*) na imagem
 - Sintaxe simples e declarativa
 - Nome do arquivo: `Dockerfile` (sem extensão)
+- Normalmente versionado junto com o projeto
 
 ---
-<style scoped>section { font-size: 22px; }</style>
+<style scoped>section { font-size: 28px; }</style>
 # Instruções Principais do Dockerfile
 
 - `FROM`: imagem base
@@ -145,7 +144,7 @@ docker images
 - `ENTRYPOINT`: comando principal do container
 
 ---
-<style scoped>pre { font-size: 14px; }</style>
+<style scoped>pre { font-size: 20px; }</style>
 # Exemplo de Dockerfile
 
 ```dockerfile
@@ -263,410 +262,295 @@ docker push usuario/meu-app:1.0
 ```
 
 ---
+<style scoped>section { font-size: 24px; }</style>
 # Docker Compose
 
-![bg right:35% 90%](../img/docker_compose.jpg)
+![bg right:40% 110%](../img/docker_compose.jpg)
 
 - Ferramenta para definir e executar aplicações multi-container
 - Usa arquivo YAML para configuração
 - Facilita orquestração de múltiplos serviços
 - Ideal para ambientes de desenvolvimento e teste
 - Nome do arquivo: `docker-compose.yml`
+- Normalmente versionado junto com o código
 
 ---
-<style scoped>section { font-size: 22px; }</style>
 # Estrutura do docker-compose.yml
 
-```yaml
-version: '3.8'
+- **version**: versão da especificação (desnecessário em versões recentes)
+- **services**: define os containers da aplicação
+- **volumes**: armazenamento persistente
+- **networks**: redes para comunicação entre containers
+- **secrets**: dados sensíveis (senhas, chaves)
+- **configs**: arquivos de configuração
 
+---
+# Definindo Services
+
+```yaml
 services:
-  nome-servico:
-    image: imagem:tag
-    # ou
-    build: ./diretorio
+  nome-do-servico:
+    image: imagem:tag        # imagem do Docker Hub
+    build: ./diretorio       # ou build local
+    container_name: nome     # nome fixo do container
     ports:
-      - "porta-host:porta-container"
+      - "8080:80"            # host:container
     volumes:
-      - ./local:/container
+      - ./local:/container   # bind mount
+      - dados:/app/data      # volume nomeado
     environment:
       - VARIAVEL=valor
     depends_on:
       - outro-servico
+    restart: unless-stopped
 ```
+
+---
+# Opção `build`
+
+```yaml
+services:
+  web:
+    # Build simples
+    build: .
+
+    # Build com opções
+    build:
+      context: ./app
+      dockerfile: Dockerfile.prod
+      args:
+        - ENV=production
+```
+
+---
+# Opção `ports`
+
+```yaml
+services:
+  web:
+    ports:
+      # porta_host:porta_container
+      - "8080:80"
+
+      # apenas porta do container (host aleatória)
+      - "80"
+
+      # especificando IP do host
+      - "127.0.0.1:8080:80"
+
+      # protocolo UDP
+      - "53:53/udp"
+```
+
+---
+# Opção `environment`
+
+```yaml
+services:
+  web:
+    # Lista de variáveis
+    environment:
+      - DEBUG=false
+      - SECRET_KEY=chave123
+
+    # Ou formato de mapa
+    environment:
+      DEBUG: "false"
+      SECRET_KEY: chave123
+
+    # Arquivo externo
+    env_file:
+      - .env
+      - .env.local
+```
+
+---
+# Opção `depends_on`
+
+```yaml
+services:
+  web:
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+
+  redis:
+    image: redis:alpine
+```
+
+> **Atenção**: `depends_on` garante ordem de início, mas não que o serviço esteja pronto para receber conexões.
+
+---
+# Opção `restart`
+
+```yaml
+services:
+  web:
+    restart: unless-stopped
+```
+
+Opções:
+- `no`: não reinicia automaticamente (padrão)
+- `always`: sempre reinicia
+- `on-failure`: reinicia apenas em caso de erro
+- `unless-stopped`: reinicia exceto se parado manualmente
+
+---
+<style scoped>section { font-size: 22px; }</style>
+# Bind Mounts vs. Volumes Nomeados
+
+**Bind Mounts** (`./codigo:/app`)
+- Mapeia diretório/arquivo do **host** para o container
+- Caminho do host especificado diretamente (começa com `./` ou `/`)
+- Útil para **desenvolvimento**: edita no host, reflete no container
+
+**Volumes Nomeados** (`dados:/app/data`)
+- Gerenciados pelo Docker (em `/var/lib/docker/volumes/`)
+- Mais portátil e seguro
+- Ideal para **dados persistentes**: bancos de dados, uploads
+
+| Uso | Tipo |
+|-----|------|
+| Código em desenvolvimento | Bind mount |
+| Banco de dados | Volume nomeado |
+| Arquivos de config | Bind mount (`:ro`) |
+
+---
+<style scoped>pre { font-size: 24px; }</style>
+# Volumes no Compose
+
+```yaml
+services:
+  web:
+    volumes:
+      - ./codigo:/app           # bind mount
+      - dados:/var/lib/dados    # volume nomeado
+  db:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  dados:
+  postgres_data:
+  dados_externos:
+    external: true              # volume já existente
+```
+
+---
+<style scoped>pre { font-size: 24px; }</style>
+# Networks
+
+```yaml
+services:
+  web:
+    networks:
+      - frontend
+      - backend
+
+  db:
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:
+    internal: true    # sem acesso externo
+```
+
+> Containers na mesma rede se comunicam pelo nome do serviço.
 
 ---
 # Comandos do Docker Compose
 
 ```bash
-# Iniciar serviços
-docker-compose up
+# Iniciar serviços (em foreground / em background)
+docker compose up
+docker compose up -d
 
-# Iniciar em background
-docker-compose up -d
+# Reconstruir e iniciar
+docker compose up -d --build
 
-# Parar serviços
-docker-compose down
+# Parar serviços / parar e remover volumes
+docker compose down
+docker compose down -v
 
-# Ver logs
-docker-compose logs
-
-# Reconstruir imagens
-docker-compose build
+# Ver serviços e logs
+docker compose ps
+docker compose logs -f web
 ```
 
 ---
-# Tutorial: Django + PostgreSQL + Nginx
-
-Vamos criar um deploy completo de uma aplicação Django usando:
-- **Django**: framework web Python
-- **PostgreSQL**: banco de dados
-- **Gunicorn**: servidor WSGI
-- **Nginx**: servidor web/proxy reverso
-
----
-# Estrutura do Projeto
-
-```
-projeto/
-├── django_app/
-│   ├── manage.py
-│   ├── requirements.txt
-│   └── ...
-├── nginx/
-│   └── nginx.conf
-├── docker-compose.yml
-└── Dockerfile
-```
-
----
-<style scoped>pre { font-size: 13px; }</style>
-# Dockerfile para Django
-
-```dockerfile
-FROM python:3.11-slim
-
-# Evita perguntas durante instalação
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Diretório de trabalho
-WORKDIR /app
-
-# Dependências do sistema
-RUN apt-get update && apt-get install -y \
-    postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
-
-# Dependências Python
-COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Copia código
-COPY . .
-
-# Porta do Gunicorn
-EXPOSE 8000
-
-# Script de inicialização
-COPY ./entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
-```
-
----
-<style scoped>pre { font-size: 14px; }</style>
-# entrypoint.sh
+# Executando Comandos e Ciclo de Vida
 
 ```bash
-#!/bin/bash
+# Executar comando em container rodando
+docker compose exec web python manage.py migrate
+docker compose exec web bash
 
-# Espera o PostgreSQL estar pronto
-echo "Aguardando PostgreSQL..."
-while ! nc -z db 5432; do
-  sleep 0.1
-done
-echo "PostgreSQL iniciado"
+# Executar em container único (sem serviço rodando)
+docker compose run web python manage.py createsuperuser
 
-# Executa migrations
-python manage.py migrate --noinput
+# Parar/iniciar/reiniciar serviços
+docker compose stop
+docker compose start
+docker compose restart web
 
-# Coleta arquivos estáticos
-python manage.py collectstatic --noinput
-
-# Inicia Gunicorn
-exec gunicorn config.wsgi:application \
-    --bind 0.0.0.0:8000 \
-    --workers 3
+# Escalar serviços
+docker compose up -d --scale web=3
 ```
 
 ---
-<style scoped>pre { font-size: 14px; }</style>
-# requirements.txt
-
-```txt
-Django>=4.2,<5.0
-psycopg2-binary>=2.9
-gunicorn>=21.0
-python-dotenv>=1.0
-```
-
-Adicione outras dependências conforme necessário.
-
----
-<style scoped>pre { font-size: 11px; }</style>
-# docker-compose.yml (1/2)
+# Variáveis de Ambiente no Compose
 
 ```yaml
-version: '3.8'
-
+# docker-compose.yml
 services:
   db:
-    image: postgres:15
-    container_name: django_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=django_db
-      - POSTGRES_USER=django_user
-      - POSTGRES_PASSWORD=senha_segura
-    networks:
-      - django_network
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+```
 
-  web:
-    build: .
-    container_name: django_web
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3
-    volumes:
-      - .:/app
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
-    environment:
-      - DEBUG=False
-      - SECRET_KEY=sua-chave-secreta-aqui
-      - DATABASE_URL=postgresql://django_user:senha_segura@db:5432/django_db
+```bash
+# .env
+POSTGRES_DB=meu_banco
+POSTGRES_USER=usuario
+POSTGRES_PASSWORD=senha_segura
 ```
 
 ---
-<style scoped>pre { font-size: 11px; }</style>
-# docker-compose.yml (2/2)
+# Health Checks
 
 ```yaml
-    depends_on:
-      - db
-    networks:
-      - django_network
-
-  nginx:
-    image: nginx:alpine
-    container_name: django_nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - static_volume:/app/staticfiles:ro
-      - media_volume:/app/media:ro
-    depends_on:
-      - web
-    networks:
-      - django_network
-
-volumes:
-  postgres_data:
-  static_volume:
-  media_volume:
-
-networks:
-  django_network:
-    driver: bridge
+services:
+  web:
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 ```
 
----
-<style scoped>pre { font-size: 10px; }</style>
-# nginx.conf
-
-```nginx
-events {
-    worker_connections 1024;
-}
-
-http {
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
-
-    upstream django {
-        server web:8000;
-    }
-
-    server {
-        listen 80;
-        server_name localhost;
-        client_max_body_size 10M;
-
-        location /static/ {
-            alias /app/staticfiles/;
-        }
-
-        location /media/ {
-            alias /app/media/;
-        }
-
-        location / {
-            proxy_pass http://django;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-    }
-}
-```
-
----
-<style scoped>section { font-size: 18px; }</style>
-# Configuração do Django
-
-No `settings.py`:
-
-```python
-import os
-from pathlib import Path
-
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'django_db'),
-        'USER': os.environ.get('POSTGRES_USER', 'django_user'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'senha_segura'),
-        'HOST': os.environ.get('DB_HOST', 'db'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-    }
-}
-
-# Static files
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-# Security
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']  # ajuste em produção
-```
-
----
-# Variáveis de Ambiente
-
-Crie um arquivo `.env` na raiz do projeto:
-
-```env
-DEBUG=False
-SECRET_KEY=chave-super-secreta-aqui
-POSTGRES_DB=django_db
-POSTGRES_USER=django_user
-POSTGRES_PASSWORD=senha_segura
-DB_HOST=db
-DB_PORT=5432
-```
-
-> **IMPORTANTE**: Adicione `.env` ao `.gitignore`!
-
----
-# Executando o Projeto
-
-```bash
-# Construir e iniciar containers
-docker-compose up -d --build
-
-# Ver logs
-docker-compose logs -f
-
-# Criar superusuário
-docker-compose exec web python manage.py createsuperuser
-
-# Acessar shell do Django
-docker-compose exec web python manage.py shell
-```
-
-Acesse: http://localhost
-
----
-# Comandos Úteis para Desenvolvimento
-
-```bash
-# Parar containers
-docker-compose down
-
-# Parar e remover volumes
-docker-compose down -v
-
-# Reconstruir apenas um serviço
-docker-compose build web
-
-# Ver status dos serviços
-docker-compose ps
-
-# Executar comando em serviço
-docker-compose exec web python manage.py migrate
-```
-
----
-# Atualizando o Projeto
-
-```bash
-# Atualizar código e dependências
-docker-compose down
-docker-compose up -d --build
-
-# Executar migrations
-docker-compose exec web python manage.py migrate
-
-# Coletar estáticos
-docker-compose exec web python manage.py collectstatic --noinput
-```
-
----
-# Backup do Banco de Dados
-
-```bash
-# Criar backup
-docker-compose exec db pg_dump -U django_user django_db > backup.sql
-
-# Restaurar backup
-docker-compose exec -T db psql -U django_user django_db < backup.sql
-```
-
----
-# Debug
-
-Ver logs de um serviço específico:
-```bash
-docker-compose logs web
-docker-compose logs db
-docker-compose logs nginx
-```
-
-Acessar container:
-```bash
-docker-compose exec web bash
-docker-compose exec db psql -U django_user django_db
-```
+Permite verificar se o serviço está realmente pronto.
 
 ---
 # Boas Práticas
 
-- Use `.dockerignore` para excluir arquivos desnecessários
-- Não inclua `DEBUG=True` em produção
-- Use variáveis de ambiente para configurações sensíveis
-- Mantenha imagens leves usando imagens base slim/alpine
+- Use `.env` para variáveis de ambiente sensíveis
+- Adicione `.env` ao `.gitignore`
 - Use volumes nomeados para dados persistentes
-- Configure health checks para os containers
-- Use multi-stage builds quando apropriado
+- Use `restart: unless-stopped` para produção
+- Defina networks explícitas para isolar serviços
+- Use health checks para dependências reais
+- Mantenha o arquivo organizado e comentado
 
 ---
+<style scoped>pre { font-size: 20px; }</style>
 # .dockerignore
 
 ```
@@ -687,27 +571,19 @@ db.sqlite3
 *.log
 ```
 
----
-# Deploy em Produção
-
-Considerações adicionais para produção:
-- Use HTTPS com certificados SSL/TLS (Let's Encrypt)
-- Configure firewall (UFW, iptables)
-- Use secrets do Docker Swarm/Kubernetes para senhas
-- Configure backup automatizado do banco
-- Implemente monitoramento e logging
-- Use um registry privado para imagens
+> Reduz o contexto de build e evita enviar arquivos sensíveis.
 
 ---
-# Plataformas de Deploy na Nuvem
+# Deploy de Containers na Nuvem
 
 - Principais provedores oferecem serviços para deploy de containers
 - Eliminam a necessidade de gerenciar servidores
 - Escalabilidade automática
 - Modelo de pagamento por uso
-- HTTPS automático
+- HTTPS automático e domínios personalizados
 
 ---
+<style scoped>section { font-size: 24px; }</style>
 # Principais Plataformas
 
 ![bg right:30% 80%](../img/cloud_platforms.png)
@@ -720,236 +596,53 @@ Considerações adicionais para produção:
 - **Fly.io**: fácil de usar, boa camada gratuita
 
 ---
-<style scoped>section { font-size: 22px; }</style>
-# Comparativo de Plataformas
+# Como Funciona o Deploy
 
-| Plataforma | Escala p/ Zero | Preço Inicial | Complexidade |
-|------------|----------------|---------------|--------------|
-| Cloud Run | Sim | Gratuito* | Baixa |
-| Azure Container Apps | Sim | Gratuito* | Baixa |
-| AWS App Runner | Não | ~$5/mês | Baixa |
-| DigitalOcean | Não | $5/mês | Baixa |
-| Fly.io | Sim | Gratuito* | Baixa |
-
-*Camada gratuita com limites
+- Criar conta no provedor de nuvem
+- Configurar projeto/aplicação
+- Fazer build da imagem Docker (local ou na nuvem)
+- Enviar imagem para o registry do provedor
+- Configurar variáveis de ambiente
+- Deploy via CLI ou interface web
 
 ---
-# Google Cloud Run
+<style scoped>section { font-size: 24px; }</style>
+# Serviços Gerenciados Integrados
 
-![bg right:30% 80%](../img/cloud_run_logo.png)
-
-- Serviço serverless para executar containers
-- Escala automaticamente de 0 a N instâncias
-- Paga apenas pelo tempo de execução
-- Suporta qualquer linguagem/framework
-- HTTPS automático
-- Camada gratuita generosa
-
----
-# Pré-requisitos para Cloud Run
-
-- Conta no Google Cloud (https://cloud.google.com)
-- Projeto criado no Google Cloud Console
-- Google Cloud CLI (`gcloud`) instalado
-- Docker instalado localmente
+- **Banco de Dados**: Cloud SQL (GCP), Azure Database, RDS (AWS)
+- **Storage**: Cloud Storage, Azure Blob, S3
+- **Cache**: Memorystore, Azure Cache, ElastiCache
+- **Filas**: Pub/Sub, Service Bus, SQS
+- **Secrets**: Secret Manager para senhas e chaves
+- Aplicação acessa esses serviços via variáveis de ambiente
 
 ---
-# Instalando o Google Cloud CLI
+# Vantagens do Deploy na Nuvem
 
-No Linux:
-```bash
-curl https://sdk.cloud.google.com | bash
-exec -l $SHELL
-gcloud init
-```
-
-No Windows, baixe o instalador em:
-https://cloud.google.com/sdk/docs/install
+- **Sem gerenciamento de servidores**: foco no código
+- **Escalabilidade**: ajusta recursos conforme demanda
+- **Alta disponibilidade**: redundância automática
+- **Segurança**: HTTPS, firewalls, IAM integrados
+- **Monitoramento**: logs e métricas centralizados
+- **CI/CD**: integração com GitHub, GitLab, etc.
 
 ---
-# Configuração Inicial
+# Considerações
 
-```bash
-# Login na conta Google
-gcloud auth login
-
-# Configurar projeto
-gcloud config set project SEU_PROJECT_ID
-
-# Habilitar APIs necessárias
-gcloud services enable run.googleapis.com
-gcloud services enable cloudbuild.googleapis.com
-```
-
----
-# Tutorial: Django no Cloud Run
-
-Estrutura do projeto:
-```
-projeto/
-├── config/
-│   ├── settings.py
-│   └── wsgi.py
-├── app/
-├── manage.py
-├── requirements.txt
-├── Dockerfile
-└── .dockerignore
-```
-
----
-<style scoped>pre { font-size: 13px; }</style>
-# Dockerfile para Cloud Run
-
-```dockerfile
-FROM python:3.11-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PORT=8080
-
-WORKDIR /app
-
-# Dependências Python
-COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Copia código
-COPY . .
-
-# Coleta arquivos estáticos
-RUN python manage.py collectstatic --noinput
-
-# Cloud Run usa a variável PORT
-CMD exec gunicorn --bind :$PORT --workers 2 config.wsgi:application
-```
-
----
-# requirements.txt
-
-```txt
-Django>=4.2,<5.0
-gunicorn>=21.0
-```
-
-Adicione outras dependências conforme necessário.
-
----
-<style scoped>section { font-size: 20px; }</style>
-# Configuração do Django para Cloud Run
-
-No `settings.py`:
-
-```python
-import os
-
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-SECRET_KEY = os.environ.get('SECRET_KEY', 'chave-desenvolvimento')
-
-ALLOWED_HOSTS = ['*']
-
-# Configurações de segurança para HTTPS
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# Arquivos estáticos
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-```
-
----
-# Deploy no Cloud Run
-
-Build e deploy em um único comando:
-```bash
-gcloud run deploy django-app \
-    --source . \
-    --region southamerica-east1 \
-    --allow-unauthenticated
-```
-
-O comando irá:
-1. Fazer build da imagem usando Cloud Build
-2. Enviar para o Container Registry
-3. Fazer deploy no Cloud Run
-
----
-# Deploy com Variáveis de Ambiente
-
-```bash
-gcloud run deploy django-app \
-    --source . \
-    --region southamerica-east1 \
-    --allow-unauthenticated \
-    --set-env-vars "DEBUG=False" \
-    --set-env-vars "SECRET_KEY=sua-chave-secreta"
-```
-
----
-# Atualizando o Deploy
-
-Após modificações no código:
-
-```bash
-gcloud run deploy django-app \
-    --source . \
-    --region southamerica-east1
-```
-
-O Cloud Run mantém as configurações anteriores.
-
----
-# Comandos Úteis
-
-```bash
-# Listar serviços
-gcloud run services list
-
-# Ver detalhes do serviço
-gcloud run services describe django-app \
-    --region southamerica-east1
-
-# Ver logs
-gcloud run services logs read django-app \
-    --region southamerica-east1
-
-# Deletar serviço
-gcloud run services delete django-app \
-    --region southamerica-east1
-```
-
----
-# Domínio Personalizado
-
-```bash
-# Mapear domínio
-gcloud run domain-mappings create \
-    --service django-app \
-    --domain meusite.com.br \
-    --region southamerica-east1
-```
-
-Configure os registros DNS conforme instruções.
-O certificado SSL é gerado automaticamente.
-
----
-# Custos do Cloud Run
-
-- **Camada gratuita**: 2 milhões de requisições/mês
-- **CPU**: cobrado por segundo de uso
-- **Memória**: cobrado por segundo de uso
-- **Escala para zero**: não cobra quando inativo
-
-Para projetos pequenos, o custo pode ser zero.
+- **Custo**: pode escalar rapidamente com uso intenso
+- **Vendor lock-in**: migração entre provedores pode ser complexa
+- **Latência**: escolher região próxima aos usuários
+- **Limites**: cada plataforma tem limites de tempo, memória, etc.
+- **Complexidade**: serviços gerenciados adicionam configuração
 
 ---
 # Alternativas e Próximos Passos
 
 - **Docker Swarm**: orquestração nativa do Docker
-- **Kubernetes/GKE**: orquestração avançada de containers
+- **Kubernetes**: orquestração avançada de containers
 - **Portainer**: interface gráfica para gerenciar Docker
 - **Traefik**: proxy reverso com suporte a containers
-- **CI/CD**: integração com GitHub Actions, GitLab CI, etc.
+- **CI/CD**: integração com GitHub Actions, GitLab CI
 
 ---
 # Referências
@@ -959,9 +652,7 @@ Para projetos pequenos, o custo pode ser zero.
 - https://hub.docker.com/
 - https://cloud.google.com/run/docs
 - https://azure.microsoft.com/pt-br/products/container-apps
-- https://docs.djangoproject.com/en/5.0/howto/deployment/
-- https://gunicorn.org/
-- https://nginx.org/en/docs/
+- https://aws.amazon.com/pt/apprunner/
 
 ---
 # <!--fit--> Dúvidas? 🤔
