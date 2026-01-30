@@ -399,24 +399,18 @@ Opções:
 - `unless-stopped`: reinicia exceto se parado manualmente
 
 ---
-<style scoped>section { font-size: 22px; }</style>
+<style scoped>section { font-size: 26px; }</style>
 # Bind Mounts vs. Volumes Nomeados
 
-**Bind Mounts** (`./codigo:/app`)
-- Mapeia diretório/arquivo do **host** para o container
-- Caminho do host especificado diretamente (começa com `./` ou `/`)
-- Útil para **desenvolvimento**: edita no host, reflete no container
+- **Bind Mounts** (`./codigo:/app`)
+    - Mapeia diretório/arquivo do **host** para o container
+    - Caminho do host especificado diretamente (começa com `./` ou `/`)
+    - Útil para **desenvolvimento**: edita no host, reflete no container
 
-**Volumes Nomeados** (`dados:/app/data`)
-- Gerenciados pelo Docker (em `/var/lib/docker/volumes/`)
-- Mais portátil e seguro
-- Ideal para **dados persistentes**: bancos de dados, uploads
-
-| Uso | Tipo |
-|-----|------|
-| Código em desenvolvimento | Bind mount |
-| Banco de dados | Volume nomeado |
-| Arquivos de config | Bind mount (`:ro`) |
+- **Volumes Nomeados** (`dados:/app/data`)
+    - Gerenciados pelo Docker (em `/var/lib/docker/volumes/`)
+    - Mais portátil e seguro
+    - Ideal para **dados persistentes**: bancos de dados, uploads
 
 ---
 <style scoped>pre { font-size: 24px; }</style>
@@ -483,7 +477,7 @@ docker compose logs -f web
 ```
 
 ---
-# Executando Comandos e Ciclo de Vida
+# Gerenciamento
 
 ```bash
 # Executar comando em container rodando
@@ -583,17 +577,14 @@ db.sqlite3
 - HTTPS automático e domínios personalizados
 
 ---
-<style scoped>section { font-size: 24px; }</style>
 # Principais Plataformas
 
 ![bg right:30% 80%](../img/cloud_platforms.png)
 
-- **Google Cloud Run**: containers serverless, escala até zero
-- **Azure Container Apps**: similar ao Cloud Run, integrado ao Azure
-- **AWS App Runner**: deploy simplificado na AWS
-- **AWS ECS/Fargate**: mais controle, maior complexidade
-- **DigitalOcean App Platform**: simples e acessível
-- **Fly.io**: fácil de usar, boa camada gratuita
+- Google Cloud Run
+- Azure Container Apps
+- AWS App Runner
+- DigitalOcean App Platform
 
 ---
 # Como Funciona o Deploy
@@ -617,6 +608,11 @@ db.sqlite3
 - Aplicação acessa esses serviços via variáveis de ambiente
 
 ---
+# Arquitetura na Nuvem
+
+![width:800px](../img/cloud_architecture.svg)
+
+---
 # Vantagens do Deploy na Nuvem
 
 - **Sem gerenciamento de servidores**: foco no código
@@ -636,7 +632,7 @@ db.sqlite3
 - **Complexidade**: serviços gerenciados adicionam configuração
 
 ---
-# Alternativas e Próximos Passos
+# Sugestão de estudo
 
 - **Docker Swarm**: orquestração nativa do Docker
 - **Kubernetes**: orquestração avançada de containers
