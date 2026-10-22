@@ -41,6 +41,7 @@ $ sudo apt install mariadb-server mariadb-client
 ```sh
 $ sudo systemctl status mariadb
 ```
+
 ---
 <style scoped>section { font-size: 22px; }</style>
 # Configuração
