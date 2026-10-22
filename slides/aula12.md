@@ -43,20 +43,6 @@ $ sudo systemctl status mariadb
 ```
 ---
 <style scoped>section { font-size: 22px; }</style>
-# Padrão de segurança
-```sh
-$ sudo mysql_secure_installation
-```
-- Enter current password for root (enter for none): - Aperte `Enter` já que ainda não há senha de *root*
-- Switch to unix_socket authentication [Y/n] - `n` para pular.
-- Set root password? [Y/n] - Digite `n` para pular.
-- Remove anonymous users? [Y/n] - Digite `y` e `Enter`.
-- Disallow root login remotely? [Y/n] - Digite `y` e `Enter`.
-- Remove test database and access to it? [Y/n] - Digite `y` e `Enter`.
-- Reload privilege tables now? [Y/n] - Digite `y` e `Enter`.
-
----
-<style scoped>section { font-size: 22px; }</style>
 # Configuração
 - Para acessar o BD:
 ```sh
