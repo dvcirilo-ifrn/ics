@@ -97,6 +97,24 @@ Mantenha o restante do `settings.py` (`INSTALLED_APPS`, `MIDDLEWARE`, `TEMPLATES
 !!! info "Como funciona?"
     As configurações de produção são lidas de variáveis de ambiente, definidas no arquivo `.env` do servidor, que nunca vai para o repositório.
 
+### Arquivo .env.exemplo
+
+Como o `.env` não vai para o repositório, crie na raiz do projeto um arquivo `.env.exemplo` que serve de modelo. Ele lista todas as variáveis usadas pelo projeto, com valores fictícios:
+
+```env
+DEBUG=False
+SECRET_KEY=<chave-gerada>
+ALLOWED_HOSTS=<ip-externo>
+DB_ENGINE=mysql
+DB_NAME=<banco-do-app>
+DB_USER=<user-do-app>
+DB_PASSWORD=<senha-do-user-do-app>
+STATIC_ROOT=/var/www/html/<projeto>/static/
+MEDIA_ROOT=/var/www/html/<projeto>/media/
+```
+
+O `.env.exemplo` vai para o repositório, então nunca coloque senhas ou chaves reais nele. Sempre que o projeto passar a usar uma nova variável, adicione-a também ao `.env.exemplo`.
+
 ### Migrations
 
 As *migrations* são criadas na máquina local e enviadas pelo Git. No servidor, elas são apenas aplicadas. Antes de enviar o projeto, crie as que estiverem faltando:
@@ -125,6 +143,8 @@ db.sqlite3
 staticfiles/
 media/
 ```
+
+A linha `.env` ignora apenas o arquivo `.env`. O `.env.exemplo` continua indo para o repositório.
 
 Faça o *commit* e envie as alterações para o repositório (`git push`).
 
@@ -193,19 +213,14 @@ Gere uma `SECRET_KEY` para o servidor:
 python -c "import secrets; print(secrets.token_urlsafe(50))"
 ```
 
-Crie o arquivo `.env` na pasta do projeto (`nano .env`):
+Crie o `.env` a partir do modelo `.env.exemplo` e abra-o para edição:
 
-```env
-DEBUG=False
-SECRET_KEY=<chave-gerada>
-ALLOWED_HOSTS=<ip-externo>
-DB_ENGINE=mysql
-DB_NAME=<banco-do-app>
-DB_USER=<user-do-app>
-DB_PASSWORD=<senha-do-user-do-app>
-STATIC_ROOT=/var/www/html/<projeto>/static/
-MEDIA_ROOT=/var/www/html/<projeto>/media/
+```bash
+cp .env.exemplo .env
+nano .env
 ```
+
+Substitua os valores entre `< >` pelos dados reais: a chave gerada, o IP externo da VM, os dados do banco criado no passo anterior e o nome da pasta do projeto.
 
 Proteja o arquivo para que apenas o seu usuário possa lê-lo:
 
@@ -419,12 +434,14 @@ else:  # exibe os emails no terminal
     }
 ```
 
-E no `.env` do servidor:
+Adicione as novas variáveis ao `.env.exemplo`, com valores fictícios:
 
 ```env
-EMAIL_USER=seuemail@gmail.com
+EMAIL_USER=<seu-email>
 EMAIL_PASSWORD=<senha-de-app>
 ```
+
+E ao `.env` do servidor, com os valores reais.
 
 !!! warning "Versões do Django"
     O `MAILERS` foi introduzido no Django 6.1 e substitui as configurações `EMAIL_BACKEND`, `EMAIL_HOST`, `EMAIL_HOST_USER` etc., que não podem ser usadas junto com ele. Remova-as do `settings.py`. Em versões anteriores do Django, use as configurações `EMAIL_*` ([documentação](https://docs.djangoproject.com/en/5.2/topics/email/#smtp-backend)).

@@ -92,9 +92,8 @@ img, table {
 # Variáveis de ambiente
 - As configurações de produção ficam em um arquivo `.env` no servidor;
 - O `.env` **nunca** vai para o repositório (`.gitignore`);
-- O `settings.py` lê as variáveis com `os.environ` e o pacote `python-dotenv`;
-- Sem `.env`, valem os valores padrão de desenvolvimento;
-- O mesmo código funciona na máquina local e no servidor.
+- Um `.env.exemplo`, com valores fictícios, vai para o repositório como modelo;
+- O `settings.py` lê as variáveis com `os.environ` e o pacote `python-dotenv`.
 
 ---
 # Arquivos estáticos e *media*
