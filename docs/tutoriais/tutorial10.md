@@ -1,33 +1,152 @@
 # Deploy de sistema Django com Docker Compose
 
-Este tutorial apresenta como fazer o deploy de uma aplicação Django utilizando Docker Compose com PostgreSQL e Nginx.
+Este tutorial apresenta como fazer o deploy de uma aplicação Django em uma VM (ex. Google Cloud) utilizando Docker Compose com Gunicorn, PostgreSQL e Nginx.
 
 !!! warning "Atenção!"
-    Antes de seguir este tutorial, certifique-se de que você estudou o conteúdo da aula sobre conteinerização e Docker. Este tutorial assume que você já tem o Docker instalado e funcionando no seu sistema.
+    Antes de seguir este tutorial, certifique-se de que você estudou o conteúdo da aula sobre conteinerização e Docker. Este tutorial assume que você já tem uma VM criada ([Tutorial 02](tutorial02.md)) com o Docker instalado e funcionando.
 
-## Estrutura do Projeto
+## Visão Geral
 
-Crie a seguinte estrutura de arquivos na raiz do seu projeto Django:
+O sistema é dividido em três containers, gerenciados pelo Docker Compose:
+
+- **nginx**: recebe as requisições do navegador, entrega os arquivos estáticos e de *media* e repassa o restante para o container `web`;
+- **web**: executa o Django com o Gunicorn;
+- **db**: banco de dados PostgreSQL.
+
+Os exemplos usam os seguintes nomes, que você deve substituir pelos seus:
+
+| Nome | Significado |
+|---|---|
+| `<projeto>` | nome da pasta do seu projeto Django |
+| `<banco-do-app>` | nome do banco de dados |
+| `<user-do-app>` | usuário do banco de dados |
+| `<senha-do-user-do-app>` | senha do usuário do banco de dados |
+| `<ip-externo>` | IP externo da VM, exibido no console do Google Cloud |
+
+O projeto deve ter a pasta de configuração chamada `config` (a que contém `settings.py` e `wsgi.py`). Se a sua tiver outro nome, ajuste os arquivos onde aparece `config`.
+
+## Parte 1: Preparação na máquina local
+
+Todas as alterações no código são feitas na sua máquina e enviadas para o servidor pelo Git. Ao final desta parte, o projeto terá a seguinte estrutura:
 
 ```
-projeto/
-├── config/              # pasta de configuração do Django (pode ter outro nome)
+<projeto>/
+├── config/              # pasta de configuração do Django
 │   ├── settings.py
 │   ├── urls.py
 │   └── wsgi.py
 ├── app/                 # suas apps Django
 ├── manage.py
 ├── requirements.txt
+├── requirements-prod.txt
 ├── Dockerfile
 ├── docker-compose.yml
 ├── entrypoint.sh
 ├── .dockerignore
-├── .env
+├── .env.exemplo
 └── nginx/
     └── nginx.conf
 ```
 
-## Dockerfile
+### Dependências
+
+O `python-dotenv` lê as configurações de um arquivo `.env`. Com o *venv* do projeto ativado, instale-o e atualize o arquivo de dependências:
+
+```bash
+pip install python-dotenv
+pip freeze > requirements.txt
+```
+
+Depois, crie o arquivo `requirements-prod.txt`, com as dependências usadas apenas no container:
+
+```txt
+-r requirements.txt
+gunicorn>=26.0
+psycopg[binary]>=3.3
+```
+
+A linha `-r requirements.txt` importa todas as dependências do projeto, então instalar o `requirements-prod.txt` instala tudo. O `psycopg` é o driver que permite ao Django se comunicar com o PostgreSQL.
+
+!!! warning "Atenção!"
+    Se o `requirements.txt` foi gerado no Windows, remova pacotes exclusivos dele (ex. `pywin32`), senão a instalação falha no container.
+
+### Modificando o settings.py
+
+Altere o início do arquivo `config/settings.py`:
+
+```python
+import os
+from pathlib import Path
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-chave-local")
+
+DEBUG = os.getenv("DEBUG", "True") == "True"
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+```
+
+Substitua a configuração `DATABASES`:
+
+```python
+if os.getenv("DB_ENGINE") == "postgresql":  # PostgreSQL
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": "db",
+            "PORT": "5432",
+        }
+    }
+else:  # SQLite
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+```
+
+O `HOST` é `db`, o nome do serviço do banco no `docker-compose.yml`.
+
+E configure os arquivos estáticos e de *media* (no final do arquivo):
+
+```python
+STATIC_URL = "static/"
+STATIC_ROOT = os.getenv("STATIC_ROOT", BASE_DIR / "staticfiles")
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = os.getenv("MEDIA_ROOT", BASE_DIR / "media")
+```
+
+Mantenha o restante do `settings.py` (`INSTALLED_APPS`, `MIDDLEWARE`, `TEMPLATES` etc.) como está.
+
+!!! info "Como funciona?"
+    As configurações de produção são lidas de variáveis de ambiente, definidas no arquivo `.env` do servidor, que nunca vai para o repositório. O Docker Compose repassa as variáveis do `.env` para os containers.
+
+### Arquivo .env.exemplo
+
+Como o `.env` não vai para o repositório, crie na raiz do projeto um arquivo `.env.exemplo` que serve de modelo. Ele lista todas as variáveis usadas pelo projeto, com valores fictícios:
+
+```env
+DEBUG=False
+SECRET_KEY=<chave-gerada>
+ALLOWED_HOSTS=<ip-externo>
+DB_ENGINE=postgresql
+DB_NAME=<banco-do-app>
+DB_USER=<user-do-app>
+DB_PASSWORD=<senha-do-user-do-app>
+```
+
+O `.env.exemplo` vai para o repositório, então nunca coloque senhas ou chaves reais nele. Sempre que o projeto passar a usar uma nova variável, adicione-a também ao `.env.exemplo`.
+
+### Dockerfile
 
 Crie o arquivo `Dockerfile` na raiz do projeto:
 
@@ -42,9 +161,9 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # Copia e instala dependências Python
-COPY requirements.txt .
+COPY requirements.txt requirements-prod.txt ./
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements-prod.txt
 
 # Script de inicialização
 COPY entrypoint.sh /entrypoint.sh
@@ -59,7 +178,10 @@ EXPOSE 8000
 ENTRYPOINT ["/entrypoint.sh"]
 ```
 
-## Script de Inicialização (entrypoint.sh)
+!!! info "Versão do Python"
+    O Django 6 requer Python 3.12 ou superior. Se o seu projeto usa uma versão mais antiga do Django, verifique a versão do Python compatível e ajuste a imagem base (ex. `python:3.12-slim`).
+
+### Script de inicialização (entrypoint.sh)
 
 Crie o arquivo `entrypoint.sh` na raiz do projeto:
 
@@ -85,24 +207,7 @@ exec gunicorn config.wsgi:application \
 !!! warning "Atenção!"
     Se você estiver no Windows, certifique-se de que o arquivo `entrypoint.sh` está com quebras de linha no formato Unix (LF) e não Windows (CRLF). Você pode usar o VS Code para alterar isso no canto inferior direito.
 
-## requirements.txt
-
-Adicione as dependências necessárias ao seu `requirements.txt`:
-
-```txt
-Django>=6.1,<6.2
-psycopg[binary]>=3.3
-gunicorn>=26.0
-```
-
-Adicione outras dependências do seu projeto conforme necessário.
-
-!!! info "Observações"
-    - O `psycopg` é o driver que permite ao Django se comunicar com o PostgreSQL.
-    - O Django 6.1 exige Python 3.12 ou superior. Se o seu projeto usa a versão LTS (5.2), troque a primeira linha por `Django>=5.2,<5.3`.
-    - As variáveis do arquivo `.env` são lidas pelo Docker Compose e repassadas para o container, então o Django as acessa diretamente com `os.environ`.
-
-## docker-compose.yml
+### docker-compose.yml
 
 Crie o arquivo `docker-compose.yml` na raiz do projeto:
 
@@ -114,9 +219,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -129,19 +234,10 @@ services:
   web:
     build: .
     container_name: django_web
+    env_file: .env
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
-    environment:
-      - DEBUG=${DEBUG}
-      - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
-      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DB_HOST=db
-      - DB_PORT=5432
     depends_on:
       db:
         condition: service_healthy
@@ -174,37 +270,14 @@ networks:
     driver: bridge
 ```
 
+O serviço `web` recebe todas as variáveis do `.env` através do `env_file`. O serviço `db` usa os mesmos valores para criar o banco e o usuário na primeira execução, através das variáveis `POSTGRES_*` exigidas pela imagem do PostgreSQL.
+
 O `healthcheck` do serviço `db` usa o comando `pg_isready` para verificar se o banco já aceita conexões. Com `condition: service_healthy`, o container `web` só inicia depois disso, evitando erros de conexão ao rodar as migrations.
 
 !!! warning "PostgreSQL 18"
     A imagem do PostgreSQL 18 guarda os dados em `/var/lib/postgresql/18/docker`, por isso o volume é montado em `/var/lib/postgresql`. Assim os dados do banco ficam no volume e não se perdem quando o container é recriado.
 
-## Arquivo de Variáveis de Ambiente (.env)
-
-Crie o arquivo `.env` na raiz do projeto:
-
-```env
-DEBUG=False
-SECRET_KEY=sua-chave-secreta-muito-longa-e-segura-aqui
-ALLOWED_HOSTS=localhost,127.0.0.1
-CSRF_TRUSTED_ORIGINS=http://localhost,http://127.0.0.1
-POSTGRES_DB=django_db
-POSTGRES_USER=django_user
-POSTGRES_PASSWORD=senha_segura_do_banco
-```
-
-Para gerar uma `SECRET_KEY` aleatória, use:
-
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(50))"
-```
-
-Ao publicar em um servidor, coloque o domínio ou IP dele em `ALLOWED_HOSTS` (ex.: `ALLOWED_HOSTS=meusite.com.br`) e a URL completa em `CSRF_TRUSTED_ORIGINS` (ex.: `CSRF_TRUSTED_ORIGINS=https://meusite.com.br`).
-
-!!! danger "Importante!"
-    Adicione o arquivo `.env` ao seu `.gitignore`. Nunca envie senhas e chaves secretas para o repositório Git!
-
-## Configuração do Nginx (nginx/nginx.conf)
+### Configuração do Nginx (nginx/nginx.conf)
 
 Crie o diretório `nginx` e o arquivo `nginx.conf` dentro dele:
 
@@ -223,7 +296,7 @@ http {
 
     server {
         listen 80;
-        server_name localhost;
+        server_name _;
         client_max_body_size 10M;
 
         location /static/ {
@@ -245,48 +318,9 @@ http {
 }
 ```
 
-## Configuração do Django (settings.py)
+O `client_max_body_size` aumenta o limite de upload do Nginx, que é de 1 MB por padrão.
 
-Modifique o arquivo `settings.py` do seu projeto Django:
-
-```python
-import os
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Segurança
-SECRET_KEY = os.environ.get('SECRET_KEY', 'chave-padrao-desenvolvimento')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-CSRF_TRUSTED_ORIGINS = os.environ.get(
-    'CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1'
-).split(',')
-
-# Banco de dados PostgreSQL
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'django_db'),
-        'USER': os.environ.get('POSTGRES_USER', 'django_user'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'senha'),
-        'HOST': os.environ.get('DB_HOST', 'db'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-    }
-}
-
-# Arquivos estáticos
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Arquivos de mídia (uploads)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-```
-
-Mantenha o restante do `settings.py` (`INSTALLED_APPS`, `MIDDLEWARE`, `TEMPLATES` etc.) como já está no seu projeto. Substitua apenas as configurações mostradas acima.
-
-## .dockerignore
+### .dockerignore
 
 Crie o arquivo `.dockerignore` na raiz do projeto para excluir arquivos desnecessários da imagem:
 
@@ -313,30 +347,107 @@ staticfiles/
 media/
 ```
 
-## Executando o Projeto
+O `.env` fica fora da imagem: as variáveis chegam ao container pelo Docker Compose.
 
-Com todos os arquivos criados, execute os seguintes comandos:
+### Migrations
+
+As *migrations* são criadas na máquina local e enviadas pelo Git. No servidor, elas são apenas aplicadas (pelo `entrypoint.sh`). Antes de enviar o projeto, crie as que estiverem faltando:
 
 ```bash
-# Construir e iniciar os containers
-docker compose up -d --build
-
-# Verificar se os containers estão rodando
-docker compose ps
-
-# Ver logs dos containers
-docker compose logs -f
+python manage.py makemigrations
 ```
 
-Acesse http://localhost no navegador para ver sua aplicação.
+### Git
 
-## Criando Superusuário
+Verifique se o `.gitignore` contém as seguintes linhas:
 
-Para criar um superusuário do Django:
+```
+.env
+venv/
+db.sqlite3
+staticfiles/
+media/
+```
+
+A linha `.env` ignora apenas o arquivo `.env`. O `.env.exemplo` continua indo para o repositório.
+
+Faça o *commit* e envie as alterações para o repositório (`git push`).
+
+## Parte 2: Configuração do servidor
+
+Acesse o servidor via SSH para os próximos passos.
+
+### Copiando o projeto
+
+Clone o repositório na sua *home*:
+
+```bash
+cd ~
+git clone <url-do-repositorio> <projeto>
+cd <projeto>
+```
+
+### Arquivo .env
+
+Gere uma `SECRET_KEY` para o servidor:
+
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+
+Crie o `.env` a partir do modelo `.env.exemplo` e abra-o para edição:
+
+```bash
+cp .env.exemplo .env
+nano .env
+```
+
+Substitua os valores entre `< >` pelos dados reais: a chave gerada, o IP externo da VM e os dados do banco. O banco e o usuário são criados automaticamente pelo container `db` com esses valores.
+
+Proteja o arquivo para que apenas o seu usuário possa lê-lo:
+
+```bash
+chmod 600 .env
+```
+
+!!! warning "IP externo"
+    No Google Cloud, o IP externo muda quando a VM é desligada e ligada novamente. Quando isso acontecer, atualize o `ALLOWED_HOSTS` no `.env` e recrie os containers com `docker compose up -d`.
+
+### Executando o projeto
+
+Construa as imagens e inicie os containers:
+
+```bash
+docker compose up -d --build
+```
+
+Verifique se os containers estão rodando. O `db` deve aparecer como `healthy`:
+
+```bash
+docker compose ps
+```
+
+Acesse `http://<ip-externo>` no navegador. O sistema deve estar funcionando, inclusive o `/admin` com seus estilos.
+
+### Superusuário e verificação
+
+Crie o superusuário do Django:
 
 ```bash
 docker compose exec web python manage.py createsuperuser
 ```
+
+Verifique a configuração de produção:
+
+```bash
+docker compose exec web python manage.py check --deploy
+```
+
+O comando lista problemas de segurança e configuração:
+
+- Avisos sobre HTTPS (`SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE` etc.) são esperados, pois este tutorial não configura HTTPS;
+- O erro `mail.E001` indica que o envio de email não foi configurado (veja a seção Email do [Tutorial 03](tutorial09.md#email-opcional));
+- Avisos sobre `SECRET_KEY` ou `DEBUG` indicam que o `.env` não foi lido corretamente.
 
 ## Comandos Úteis
 
@@ -352,9 +463,6 @@ docker compose down -v
 # Reiniciar apenas um serviço
 docker compose restart web
 
-# Reconstruir um serviço específico
-docker compose build web
-
 # Ver status dos serviços
 docker compose ps
 ```
@@ -365,20 +473,14 @@ docker compose ps
 # Acessar o shell do container web
 docker compose exec web bash
 
-# Executar migrations
-docker compose exec web python manage.py migrate
-
-# Criar nova app Django
-docker compose exec web python manage.py startapp nome_app
-
 # Acessar o shell do Django
 docker compose exec web python manage.py shell
 
 # Acessar o banco de dados
-docker compose exec db psql -U django_user django_db
+docker compose exec db psql -U <user-do-app> <banco-do-app>
 ```
 
-### Logs e Debug
+### Logs
 
 ```bash
 # Ver logs de todos os serviços
@@ -398,56 +500,58 @@ docker compose logs -f web
 ### Criar Backup
 
 ```bash
-docker compose exec -T db pg_dump -U django_user django_db > backup.sql
+docker compose exec -T db pg_dump -U <user-do-app> <banco-do-app> > backup.sql
 ```
 
 ### Restaurar Backup
 
 ```bash
-docker compose exec -T db psql -U django_user django_db < backup.sql
+docker compose exec -T db psql -U <user-do-app> <banco-do-app> < backup.sql
 ```
 
 ## Atualizando o Projeto
 
-Após fazer alterações no código:
+Faça as alterações na máquina local, crie as *migrations* se necessário e envie para o repositório. No servidor:
 
 ```bash
-# Reconstruir a imagem e recriar os containers alterados
+cd ~/<projeto>
+git pull
 docker compose up -d --build
 ```
 
 Não é preciso rodar `migrate` e `collectstatic` manualmente: o `entrypoint.sh` faz isso toda vez que o container `web` inicia.
 
+Ao alterar apenas o `.env`, execute `docker compose up -d`. O `docker compose restart` não relê o `.env`.
+
 ## Solução de Problemas
 
-### Container não inicia
-
-Verifique os logs do container:
+### Onde ver os erros
 
 ```bash
+# Status dos containers
+docker compose ps
+
+# Erros do Django/Gunicorn
 docker compose logs web
+
+# Erros do Nginx
+docker compose logs nginx
 ```
 
-### Erro de conexão com banco de dados
+### Erros comuns
 
-1. Verifique se o container do banco está rodando e com status `healthy`: `docker compose ps`
-2. Verifique as variáveis de ambiente no `.env`
-3. Verifique os logs do banco: `docker compose logs db`
+| Erro | Causa provável |
+|---|---|
+| 502 Bad Gateway | O container `web` não está rodando. Verifique o `docker compose logs web` |
+| 400 Bad Request | O IP ou domínio acessado não está no `ALLOWED_HOSTS` do `.env` |
+| 413 Request Entity Too Large | Upload maior que o `client_max_body_size` do Nginx |
+| Página sem estilos (CSS) | O `collectstatic` falhou (veja `docker compose logs web`) ou os volumes `static_volume` não correspondem ao `STATIC_ROOT` |
+| Container `web` reiniciando | Erro no `entrypoint.sh` ou nas migrations. Veja `docker compose logs web` |
+| `exec /entrypoint.sh: no such file or directory` | O `entrypoint.sh` está com quebras de linha do Windows (CRLF) |
+| Erro de acesso ao banco | O `db` não está `healthy` ou os dados do `.env` foram alterados depois da criação do volume |
 
-### Arquivos estáticos não carregam
-
-1. Verifique se o `collectstatic` foi executado
-2. Verifique as configurações de `STATIC_ROOT` e `STATIC_URL`
-3. Verifique os volumes no `docker-compose.yml`
-
-### Permissões de arquivo
-
-Se encontrar erros de permissão, pode ser necessário ajustar as permissões:
-
-```bash
-docker compose exec web chmod -R 755 /app/staticfiles
-docker compose exec web chmod -R 755 /app/media
-```
+!!! info "Dados do banco"
+    O banco e o usuário são criados apenas na primeira execução, quando o volume `postgres_data` está vazio. Alterar `DB_NAME`, `DB_USER` ou `DB_PASSWORD` depois disso não altera o banco existente.
 
 ## Considerações de Produção
 
@@ -455,9 +559,8 @@ Para uso em produção, considere:
 
 - Configurar HTTPS com certificados SSL (Let's Encrypt)
 - Usar senhas fortes e únicas
-- Configurar firewall no servidor
 - Implementar backup automatizado do banco de dados
 - Configurar monitoramento e alertas
 - Usar um registry privado para as imagens Docker
 - Configurar health checks também nos containers `web` e `nginx`
-- Ao usar HTTPS atrás do Nginx, adicionar `SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')` ao `settings.py`
+- Ao usar HTTPS atrás do Nginx, adicionar `SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")` ao `settings.py`

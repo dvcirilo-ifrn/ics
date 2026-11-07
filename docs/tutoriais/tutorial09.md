@@ -11,7 +11,7 @@ No servidor, cada parte do sistema tem uma função:
 
 - **Nginx**: recebe as requisições do navegador, entrega os arquivos estáticos e de *media* e repassa o restante para o Gunicorn;
 - **Gunicorn**: executa o Django e se comunica com o Nginx através de um *socket*;
-- **systemd**: mantém o Gunicorn rodando como um serviço (*daemon*);
+- **systemd**: mantém o Nginx, o Gunicorn e o MariaDB rodando como serviços (*daemons*);
 - **MariaDB**: banco de dados da aplicação.
 
 Os exemplos usam os seguintes nomes, que você deve substituir pelos seus:
@@ -46,29 +46,30 @@ Altere o início do arquivo `config/settings.py`:
 ```python
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-chave-local")
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-chave-local")
 
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 ```
 
 Substitua a configuração `DATABASES`:
 
 ```python
-if os.environ.get("DB_ENGINE") == "mysql":  # MariaDB
+if os.getenv("DB_ENGINE") == "mysql":  # MariaDB
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
             "OPTIONS": {"sql_mode": "traditional"},
-            "NAME": os.environ.get("DB_NAME"),
-            "USER": os.environ.get("DB_USER"),
-            "PASSWORD": os.environ.get("DB_PASSWORD"),
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
             "HOST": "localhost",
             "PORT": "3306",
         }
@@ -86,10 +87,10 @@ E configure os arquivos estáticos e de *media* (no final do arquivo):
 
 ```python
 STATIC_URL = "static/"
-STATIC_ROOT = os.environ.get("STATIC_ROOT", BASE_DIR / "staticfiles")
+STATIC_ROOT = os.getenv("STATIC_ROOT", BASE_DIR / "staticfiles")
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = os.environ.get("MEDIA_ROOT", BASE_DIR / "media")
+MEDIA_ROOT = os.getenv("MEDIA_ROOT", BASE_DIR / "media")
 ```
 
 Mantenha o restante do `settings.py` (`INSTALLED_APPS`, `MIDDLEWARE`, `TEMPLATES` etc.) como está.
@@ -134,6 +135,16 @@ pip freeze > requirements.txt
 !!! warning "Atenção!"
     Se o `requirements.txt` foi gerado no Windows, remova pacotes exclusivos dele (ex. `pywin32`), senão a instalação falha no servidor.
 
+Crie também o arquivo `requirements-prod.txt`, com as dependências usadas apenas no servidor:
+
+```txt
+-r requirements.txt
+gunicorn>=26.0
+mysqlclient>=2.3
+```
+
+A linha `-r requirements.txt` importa todas as dependências do projeto, então instalar o `requirements-prod.txt` instala tudo. Assim, o Gunicorn e o driver do MariaDB não precisam ser instalados na sua máquina.
+
 Verifique se o `.gitignore` contém as seguintes linhas:
 
 ```
@@ -176,13 +187,12 @@ cd <projeto>
 
 ### Ambiente virtual
 
-Crie o *venv* dentro da pasta do projeto e instale as dependências, incluindo as que só são usadas no servidor:
+Crie o *venv* dentro da pasta do projeto e instale as dependências de produção:
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-pip install mysqlclient gunicorn
+pip install -r requirements-prod.txt
 ```
 
 !!! warning "Atenção!"
@@ -397,7 +407,7 @@ Faça as alterações na máquina local, crie as *migrations* se necessário e e
 cd ~/<projeto>
 git pull
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-prod.txt
 python manage.py migrate
 python manage.py collectstatic --noinput
 sudo systemctl restart <projeto>_gunicorn.service
@@ -413,7 +423,7 @@ Ao alterar apenas o `.env`, basta reiniciar o Gunicorn (último comando).
 Servidores de email novos costumam cair em filtros de *spam*, então o ideal é enviar emails através do SMTP de um provedor conhecido. Exemplo com o Gmail, que exige a verificação em duas etapas e uma [senha de app](https://myaccount.google.com/apppasswords):
 
 ```python
-if os.environ.get("EMAIL_USER"):  # envia pelo Gmail
+if os.getenv("EMAIL_USER"):  # envia pelo Gmail
     MAILERS = {
         "default": {
             "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
@@ -421,8 +431,8 @@ if os.environ.get("EMAIL_USER"):  # envia pelo Gmail
                 "host": "smtp.gmail.com",
                 "port": 587,
                 "use_tls": True,
-                "username": os.environ.get("EMAIL_USER"),
-                "password": os.environ.get("EMAIL_PASSWORD"),
+                "username": os.getenv("EMAIL_USER"),
+                "password": os.getenv("EMAIL_PASSWORD"),
             },
         },
     }

@@ -38,6 +38,7 @@ img, table {
 | `DEBUG` | `True` | `False` |
 | Estáticos | Django | *nginx* |
 | Configurações | no código | variáveis de ambiente |
+| Dependências | `requirements.txt` | `requirements-prod.txt` |
 
 - O `runserver` é feito para testes: lento, inseguro e não roda como serviço.
 
@@ -93,7 +94,7 @@ img, table {
 - As configurações de produção ficam em um arquivo `.env` no servidor;
 - O `.env` **nunca** vai para o repositório (`.gitignore`);
 - Um `.env.exemplo`, com valores fictícios, vai para o repositório como modelo;
-- O `settings.py` lê as variáveis com `os.environ` e o pacote `python-dotenv`.
+- O `settings.py` lê as variáveis com `os.getenv` e o pacote `python-dotenv`.
 
 ---
 # Arquivos estáticos e *media*
