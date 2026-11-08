@@ -64,7 +64,7 @@ rm ~/.ssh/github_actions
 
 ## Parte 2: Secrets no GitHub
 
-No repositório do GitHub, acesse **Settings** → **Secrets and variables** → **Actions** e clique em **New repository secret** para cadastrar cada um dos *secrets*:
+No repositório do GitHub, acesse **Settings** > **Secrets and variables** > **Actions** e clique em **New repository secret** para cadastrar cada um dos *secrets*:
 
 | Nome | Valor |
 |---|---|
@@ -165,7 +165,7 @@ O *push* dispara o *workflow*. No repositório do GitHub, acesse a aba **Actions
 
 Quando o *deploy* terminar, acesse o sistema no navegador e verifique se a alteração foi publicada.
 
-Para executar o *workflow* sem um novo *push*, acesse **Actions** → **CI/CD** → **Run workflow**.
+Para executar o *workflow* sem um novo *push*, acesse **Actions** > **CI/CD** > **Run workflow**.
 
 !!! info "Indisponibilidade"
     Durante o `docker compose up -d --build`, o container `web` é recriado e o sistema fica indisponível por alguns segundos.

@@ -66,7 +66,7 @@ img, table {
 ---
 # Por que Docker?
 
-- **Portabilidade**: "funciona na minha máquina" → funciona em qualquer lugar
+- **Portabilidade**: o que funciona na minha máquina funciona em qualquer lugar
 - **Consistência**: mesmo ambiente em dev, teste e produção
 - **Eficiência**: usa recursos do sistema de forma otimizada
 - **Isolamento**: aplicações isoladas em containers

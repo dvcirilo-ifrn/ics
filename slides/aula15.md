@@ -70,7 +70,7 @@ img, table {
 
 - *Certificate Authority* (CA): verifica que você controla o domínio e assina o certificado;
 - Navegadores e sistemas operacionais já vêm com a lista de CAs confiáveis (raízes);
-- Cadeia de confiança: CA raiz → CA intermediária → certificado do site;
+- Cadeia de confiança: a CA raiz assina a CA intermediária, que assina o certificado do site;
 - Certificado *autoassinado*: não é assinado por uma CA, e o navegador exibe um alerta.
 
 ---
