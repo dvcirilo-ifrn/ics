@@ -340,10 +340,10 @@ sudo systemctl status <projeto>_gunicorn.service
 O status deve mostrar `active (running)`. Teste se o Django responde pelo *socket*:
 
 ```bash
-curl --unix-socket /run/<projeto>_gunicorn.sock http://localhost/
+curl --unix-socket /run/<projeto>_gunicorn.sock http://<ip-externo>/
 ```
 
-O comando deve exibir o HTML da página inicial do seu sistema.
+O comando deve exibir o HTML da página inicial do seu sistema. O endereço na URL precisa estar no `ALLOWED_HOSTS`, senão o Django responde com `400 Bad Request`.
 
 ## Parte 4: Nginx
 

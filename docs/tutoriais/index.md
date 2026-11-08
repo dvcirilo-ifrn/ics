@@ -18,3 +18,5 @@
 - [Tutorial 02 - Criação de Instância de VM no Google Cloud](tutorial02.md)
 - [Tutorial 03 - Deploy de sistema Django no GCloud](tutorial09.md)
 - [Tutorial 04 - Deploy de Django com Docker Compose](tutorial10.md)
+- [Tutorial 05 - Configuração de HTTPS com nginx e Let's Encrypt](tutorial11.md)
+- [Tutorial 06 - Deploy automático com GitHub Actions](tutorial12.md)

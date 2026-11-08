@@ -15,6 +15,8 @@ nav:
     - 'Criação de Instância de VM no Google Cloud': 'tutoriais/tutorial02.md'
     - 'Deploy de sistema Django no GCloud': 'tutoriais/tutorial09.md'
     - 'Deploy de sistema Django com Docker': 'tutoriais/tutorial10.md'
+    - 'HTTPS com nginx e Let''s Encrypt': 'tutoriais/tutorial11.md'
+    - 'Deploy automático com GitHub Actions': 'tutoriais/tutorial12.md'
   - Listas:
     - 'listas/index.md'
     - 'Lista 01': listas/lista01.md

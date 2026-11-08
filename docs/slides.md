@@ -19,4 +19,6 @@
 | 12  | Banco de Dados MySQL/mariadb               | [:material-presentation:](aula12.html) - [:material-file-pdf-box:](aula12.pdf) |
 | 13  | Deploy de um sistema Django                | [:material-presentation:](aula13.html) - [:material-file-pdf-box:](aula13.pdf) |
 | 14  | Conteinerização                            | [:material-presentation:](aula14.html) - [:material-file-pdf-box:](aula14.pdf) |
+| 15  | HTTPS e Certificados Digitais              | [:material-presentation:](aula15.html) - [:material-file-pdf-box:](aula15.pdf) |
+| 16  | Implantação Automática (CI/CD)             | [:material-presentation:](aula16.html) - [:material-file-pdf-box:](aula16.pdf) |
 
