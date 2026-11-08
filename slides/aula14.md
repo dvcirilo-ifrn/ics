@@ -74,14 +74,23 @@ img, table {
 - **Versionamento**: imagens versionadas como código
 
 ---
-# Conceitos Fundamentais
+# Imagem e Container
 
 - **Imagem**: template read-only com o SO, aplicação e dependências
+    - Construída a partir de um **Dockerfile**
+    - Armazenada em um **Registry** (Docker Hub, etc.)
 - **Container**: instância executável de uma imagem
-- **Dockerfile**: arquivo de instruções para construir imagens
-- **Registry**: repositório de imagens (Docker Hub, etc.)
-- **Volume**: armazenamento persistente
-- **Network**: rede para comunicação entre containers
+    - Uma imagem pode gerar vários containers
+    - É **efêmero**: ao ser removido ou recriado, perde tudo o que foi gravado nele
+
+---
+# Volumes e Redes
+
+- **Volume**: armazenamento persistente, fora do container
+    - Os dados sobrevivem à remoção e recriação do container
+    - Ex. banco de dados, uploads
+- **Network**: rede virtual para comunicação entre containers
+    - No Compose, os containers se encontram pelo nome do serviço (ex. `db`)
 
 ---
 # Instalação do Docker no Debian/Ubuntu
