@@ -23,6 +23,8 @@ nav:
     - 'Lista 02': listas/lista02.md
     - 'Lista 03': listas/lista03.md
     - 'Lista 04': listas/lista04.md
+exclude_docs: |
+  listas/*_antiga.md
 markdown_extensions:
   - admonition
   - attr_list
